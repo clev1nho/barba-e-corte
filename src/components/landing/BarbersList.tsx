@@ -56,7 +56,7 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
                 <img
                   src={barber.photo_url}
                   alt={barber.name}
-                  className="w-full h-auto object-contain md:h-[220px] md:object-cover"
+                  className="w-full h-auto object-contain md:h-auto md:object-contain"
                 />
               ) : (
                 <div className="w-full h-64 md:h-[220px] bg-gradient-gold flex items-center justify-center">
