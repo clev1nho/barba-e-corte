@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
-import { LayoutDashboard, Calendar, Scissors, Users, Settings, LogOut, Home, Loader2, DollarSign } from "lucide-react";
+import { LayoutDashboard, Calendar, Scissors, Users, Settings, LogOut, Home, Loader2, DollarSign, LayoutGrid } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -14,6 +14,7 @@ const allNavItems = [
   { icon: Scissors, label: "Serviços", href: "/admin/servicos", ownerOnly: true },
   { icon: Users, label: "Barbeiros", href: "/admin/barbeiros", ownerOnly: true },
   { icon: DollarSign, label: "Financeiro", href: "/admin/financeiro", ownerOnly: true },
+  { icon: LayoutGrid, label: "Home", href: "/admin/categorias-home", ownerOnly: true },
   { icon: Settings, label: "Config", href: "/admin/configuracoes", ownerOnly: true },
 ];
 

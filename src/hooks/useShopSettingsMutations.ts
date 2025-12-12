@@ -16,8 +16,10 @@ interface UpdateShopSettingsData {
   highlight_points?: string[];
   working_hours?: WorkingHours;
   logo_url?: string;
-  hero_secondary_text?: string;
-  about_description?: string;
+  hero_secondary_text?: string | null;
+  about_description?: string | null;
+  services_section_title?: string | null;
+  services_section_subtitle?: string | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {

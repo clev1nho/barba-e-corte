@@ -208,20 +208,29 @@ export type Database = {
         Row: {
           created_at: string | null
           display_order: number | null
+          home_enabled: boolean | null
+          icon_image_url: string | null
           id: string
           name: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           display_order?: number | null
+          home_enabled?: boolean | null
+          icon_image_url?: string | null
           id?: string
           name: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           display_order?: number | null
+          home_enabled?: boolean | null
+          icon_image_url?: string | null
           id?: string
           name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -285,6 +294,8 @@ export type Database = {
           logo_url: string | null
           name: string
           open_time: string | null
+          services_section_subtitle: string | null
+          services_section_title: string | null
           slot_interval_minutes: number | null
           subtitle: string | null
           updated_at: string | null
@@ -303,6 +314,8 @@ export type Database = {
           logo_url?: string | null
           name?: string
           open_time?: string | null
+          services_section_subtitle?: string | null
+          services_section_title?: string | null
           slot_interval_minutes?: number | null
           subtitle?: string | null
           updated_at?: string | null
@@ -321,6 +334,8 @@ export type Database = {
           logo_url?: string | null
           name?: string
           open_time?: string | null
+          services_section_subtitle?: string | null
+          services_section_title?: string | null
           slot_interval_minutes?: number | null
           subtitle?: string | null
           updated_at?: string | null

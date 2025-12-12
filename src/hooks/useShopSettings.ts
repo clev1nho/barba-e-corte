@@ -33,6 +33,8 @@ export interface ShopSettings {
   logo_url: string | null;
   hero_secondary_text: string | null;
   about_description: string | null;
+  services_section_title: string | null;
+  services_section_subtitle: string | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -100,6 +102,8 @@ export function useShopSettings() {
           logo_url: data.logo_url,
           hero_secondary_text: data.hero_secondary_text,
           about_description: data.about_description,
+          services_section_title: (data as any).services_section_title ?? null,
+          services_section_subtitle: (data as any).services_section_subtitle ?? null,
         } as ShopSettings;
       }
       
