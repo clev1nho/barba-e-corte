@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useAppointments, useUpdateAppointmentStatus, AppointmentStatus } from "@/hooks/useAppointments";
-import { Calendar, Clock, User, Scissors } from "lucide-react";
+import { useDashboardAppointments, useUpdateAppointmentStatus, AppointmentStatus } from "@/hooks/useAppointments";
+import { Calendar, Clock, User, Scissors, CheckCircle, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
@@ -18,7 +18,7 @@ const statusColors: Record<AppointmentStatus, string> = {
 const Dashboard = () => {
   const today = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(today);
-  const { data: appointments, isLoading } = useAppointments(selectedDate);
+  const { data: appointments, isLoading } = useDashboardAppointments(selectedDate);
   const updateStatus = useUpdateAppointmentStatus();
 
   const handleStatusChange = (id: string, status: AppointmentStatus) => {
@@ -40,9 +40,29 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="glass-card rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Agendamentos do dia</p>
-          <p className="text-3xl font-bold text-primary">{appointments?.length || 0}</p>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="glass-card rounded-xl p-4 text-center">
+            <p className="text-sm text-muted-foreground">Total</p>
+            <p className="text-2xl font-bold text-primary">{appointments?.length || 0}</p>
+          </div>
+          <div className="glass-card rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <CheckCircle className="w-4 h-4 text-green-400" />
+            </div>
+            <p className="text-sm text-muted-foreground">Confirmados</p>
+            <p className="text-2xl font-bold text-green-400">
+              {appointments?.filter(a => a.status === "Confirmado").length || 0}
+            </p>
+          </div>
+          <div className="glass-card rounded-xl p-4 text-center">
+            <div className="flex items-center justify-center gap-1 mb-1">
+              <AlertCircle className="w-4 h-4 text-yellow-400" />
+            </div>
+            <p className="text-sm text-muted-foreground">Pendentes</p>
+            <p className="text-2xl font-bold text-yellow-400">
+              {appointments?.filter(a => a.status === "Pendente").length || 0}
+            </p>
+          </div>
         </div>
 
         {/* Appointments list */}
