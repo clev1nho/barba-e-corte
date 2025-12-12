@@ -53,10 +53,12 @@ export function Hero({ settings }: HeroProps) {
           {settings?.subtitle || "Cortes de alto nível e atendimento profissional"}
         </p>
 
-        {/* Description */}
-        <p className="text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          Agendamento online, rápido e sem precisar mandar mensagem.
-        </p>
+        {/* Description - only render if text exists */}
+        {(settings?.hero_secondary_text !== null && settings?.hero_secondary_text !== undefined && settings?.hero_secondary_text !== "") && (
+          <p className="text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            {settings.hero_secondary_text}
+          </p>
+        )}
 
         {/* CTA Buttons */}
         <div className="flex flex-col gap-4 animate-slide-up" style={{ animationDelay: "0.3s" }}>

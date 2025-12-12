@@ -31,6 +31,8 @@ export interface ShopSettings {
   highlight_points: string[] | null;
   working_hours: WorkingHours | null;
   logo_url: string | null;
+  hero_secondary_text: string | null;
+  about_description: string | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -96,6 +98,8 @@ export function useShopSettings() {
           highlight_points: data.highlight_points,
           working_hours: workingHours || DEFAULT_WORKING_HOURS,
           logo_url: data.logo_url,
+          hero_secondary_text: data.hero_secondary_text,
+          about_description: data.about_description,
         } as ShopSettings;
       }
       

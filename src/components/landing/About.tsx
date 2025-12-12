@@ -17,11 +17,12 @@ export function About({ settings }: AboutProps) {
         <h2 className="text-2xl font-bold mb-6 text-center">Sobre a Barbearia</h2>
 
         <div className="glass-card rounded-2xl p-6">
-          <p className="text-muted-foreground mb-6 leading-relaxed">
-            Nossa barbearia oferece uma experiência única em cuidados masculinos. 
-            Combinamos técnicas tradicionais com tendências modernas para entregar 
-            cortes impecáveis e atendimento de primeira classe.
-          </p>
+          {/* About description - only render if text exists */}
+          {(settings?.about_description !== null && settings?.about_description !== undefined && settings?.about_description !== "") && (
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              {settings.about_description}
+            </p>
+          )}
 
           <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-xl">
             <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
