@@ -1,7 +1,10 @@
 import { Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useShopSettings } from "@/hooks/useShopSettings";
 
 export function Footer() {
+  const { data: settings } = useShopSettings();
+
   return (
     <footer className="py-8 px-4 border-t border-border">
       <div className="max-w-lg mx-auto">
@@ -9,7 +12,7 @@ export function Footer() {
           <div className="w-8 h-8 rounded-lg bg-gradient-gold flex items-center justify-center">
             <Scissors className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-semibold">Barbearia Exclusiva</span>
+          <span className="font-semibold">{settings?.name || "Care For Men"}</span>
         </div>
 
         <div className="flex justify-center gap-6 text-sm text-muted-foreground">
