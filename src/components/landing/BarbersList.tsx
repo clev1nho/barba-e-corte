@@ -20,10 +20,10 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 text-center">Nossos Barbeiros</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">
-                <div className="h-[180px] md:h-[220px] bg-muted" />
+                <div className="h-64 md:h-[220px] bg-muted" />
                 <div className="p-4">
                   <div className="h-5 bg-muted rounded w-3/4 mx-auto" />
                 </div>
@@ -45,7 +45,7 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
           Profissionais experientes e dedicados
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
@@ -56,10 +56,10 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
                 <img
                   src={barber.photo_url}
                   alt={barber.name}
-                  className="w-full h-[180px] md:h-[220px] object-cover"
+                  className="w-full h-64 md:h-[220px] object-cover"
                 />
               ) : (
-                <div className="w-full h-[180px] md:h-[220px] bg-gradient-gold flex items-center justify-center">
+                <div className="w-full h-64 md:h-[220px] bg-gradient-gold flex items-center justify-center">
                   <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
                     {getInitials(barber.name)}
                   </span>
