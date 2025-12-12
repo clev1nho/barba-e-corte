@@ -1,4 +1,3 @@
-import { User } from "lucide-react";
 import { Barber } from "@/hooks/useBarbers";
 
 interface BarbersListProps {
@@ -6,21 +5,27 @@ interface BarbersListProps {
   isLoading: boolean;
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 export function BarbersList({ barbers, isLoading }: BarbersListProps) {
   if (isLoading) {
     return (
       <section className="py-16 px-4">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 text-center">Nossos Barbeiros</h2>
-          <div className="grid gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-muted" />
-                  <div className="flex-1">
-                    <div className="h-5 bg-muted rounded w-24 mb-2" />
-                    <div className="h-4 bg-muted rounded w-full" />
-                  </div>
+              <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">
+                <div className="h-[180px] md:h-[220px] bg-muted" />
+                <div className="p-4">
+                  <div className="h-5 bg-muted rounded w-3/4 mx-auto" />
                 </div>
               </div>
             ))}
@@ -34,39 +39,34 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
 
   return (
     <section className="py-16 px-4">
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-2 text-center">Nossos Barbeiros</h2>
         <p className="text-muted-foreground text-center mb-8">
           Profissionais experientes e dedicados
         </p>
 
-        <div className="grid gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
-              className="glass-card rounded-xl p-4 animate-fade-in"
+              className="glass-card rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">
-                  {barber.photo_url ? (
-                    <img
-                      src={barber.photo_url}
-                      alt={barber.name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-primary/30"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-gold flex items-center justify-center">
-                      <User className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                  )}
+              {barber.photo_url ? (
+                <img
+                  src={barber.photo_url}
+                  alt={barber.name}
+                  className="w-full h-[180px] md:h-[220px] object-cover"
+                />
+              ) : (
+                <div className="w-full h-[180px] md:h-[220px] bg-gradient-gold flex items-center justify-center">
+                  <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
+                    {getInitials(barber.name)}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg">{barber.name}</h3>
-                  {barber.bio && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">{barber.bio}</p>
-                  )}
-                </div>
+              )}
+              <div className="p-4">
+                <h3 className="font-semibold text-lg text-center">{barber.name}</h3>
               </div>
             </div>
           ))}
