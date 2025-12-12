@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BarberPhotoUpload } from "@/components/admin/BarberPhotoUpload";
 import {
   Dialog,
   DialogContent,
@@ -198,12 +199,12 @@ const Barbeiros = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="photo_url">URL da Foto</Label>
-                  <Input
-                    id="photo_url"
-                    value={formData.photo_url}
-                    onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                    placeholder="https://..."
+                  <Label>Foto</Label>
+                  <BarberPhotoUpload
+                    currentPhotoUrl={formData.photo_url}
+                    barberName={formData.name}
+                    onPhotoChange={(url) => setFormData({ ...formData, photo_url: url })}
+                    disabled={createBarber.isPending || updateBarber.isPending}
                   />
                 </div>
 
