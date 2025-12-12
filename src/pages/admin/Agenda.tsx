@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAppointments, useUpdateAppointmentStatus, useDeleteAppointment, AppointmentStatus, Appointment } from "@/hooks/useAppointments";
 import { useCreateFinancialTransaction } from "@/hooks/useFinancialTransactions";
+import { useBarbers } from "@/hooks/useBarbers";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, User, Scissors, Phone, Trash2, ChevronLeft, ChevronRight, DollarSign } from "lucide-react";
+import { Calendar, Clock, User, Scissors, Phone, Trash2, ChevronLeft, ChevronRight, DollarSign, Users, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { format, addDays, subDays } from "date-fns";
@@ -22,11 +24,15 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const STORAGE_KEY = "agenda_selected_barber";
 
 const statusOptions: AppointmentStatus[] = ["Pendente", "Confirmado", "Concluído", "Cancelado", "Não compareceu"];
 
@@ -47,21 +53,55 @@ const paymentMethodOptions = [
 ];
 
 const Agenda = () => {
+  const { isStaff, isAdminOrOwner, barberId: staffBarberId, loading: authLoading } = useAdminAuth();
+  const { data: barbers, isLoading: barbersLoading } = useBarbers(false);
+  
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [pendingAppointment, setPendingAppointment] = useState<Appointment | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix");
   
+  // Initialize barber selection based on role
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (isStaff && staffBarberId) {
+      // Staff: auto-select their linked barber
+      setSelectedBarberId(staffBarberId);
+    } else if (isAdminOrOwner) {
+      // Owner: restore from localStorage or null
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved && barbers?.some(b => b.id === saved)) {
+        setSelectedBarberId(saved);
+      }
+    }
+  }, [authLoading, isStaff, isAdminOrOwner, staffBarberId, barbers]);
+
+  // Save owner's selection to localStorage
+  useEffect(() => {
+    if (isAdminOrOwner && selectedBarberId) {
+      localStorage.setItem(STORAGE_KEY, selectedBarberId);
+    }
+  }, [isAdminOrOwner, selectedBarberId]);
+
   const dateString = format(selectedDate, "yyyy-MM-dd");
-  const { data: appointments, isLoading } = useAppointments(dateString);
+  const { data: appointments, isLoading } = useAppointments(dateString, selectedBarberId || undefined);
   const updateStatus = useUpdateAppointmentStatus();
   const deleteAppointment = useDeleteAppointment();
   const createFinancialTransaction = useCreateFinancialTransaction();
 
+  const handleBarberSelect = (barberId: string) => {
+    setSelectedBarberId(barberId);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedBarberId(null);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   const handleStatusChange = async (appointment: Appointment, newStatus: AppointmentStatus) => {
-    // If changing to "Concluído", show payment method dialog
     if (newStatus === "Concluído") {
-      // Check if transaction already exists for this appointment
       const { data: existingTransaction } = await supabase
         .from("financial_transactions")
         .select("id")
@@ -69,18 +109,15 @@ const Agenda = () => {
         .maybeSingle();
 
       if (existingTransaction) {
-        // Transaction already exists, just update status
         updateStatus.mutate({ id: appointment.id, status: newStatus });
         return;
       }
 
-      // Show payment method dialog
       setPendingAppointment(appointment);
       setPaymentDialogOpen(true);
       return;
     }
 
-    // For other statuses, just update
     updateStatus.mutate({ id: appointment.id, status: newStatus });
   };
 
@@ -88,10 +125,8 @@ const Agenda = () => {
     if (!pendingAppointment) return;
 
     try {
-      // Update appointment status
       await updateStatus.mutateAsync({ id: pendingAppointment.id, status: "Concluído" });
 
-      // Create financial transaction
       const serviceName = pendingAppointment.services?.name || "Serviço";
       const servicePrice = pendingAppointment.services?.price || 0;
 
@@ -131,141 +166,231 @@ const Agenda = () => {
   const goToNextDay = () => setSelectedDate(addDays(selectedDate, 1));
   const goToToday = () => setSelectedDate(new Date());
 
+  const selectedBarber = barbers?.find(b => b.id === selectedBarberId);
+
+  // Staff without linked barber
+  if (!authLoading && isStaff && !staffBarberId) {
+    return (
+      <AdminLayout title="Agenda">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Users className="w-16 h-16 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Usuário não vinculado</h2>
+          <p className="text-muted-foreground max-w-md">
+            Seu usuário não está vinculado a um barbeiro. Contate o administrador para configurar seu acesso.
+          </p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout title="Agenda">
       <div className="space-y-6">
-        {/* Date Navigation */}
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <Button variant="ghost" size="icon" onClick={goToPreviousDay}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            
-            <div className="text-center">
-              <p className="text-lg font-semibold capitalize">
-                {format(selectedDate, "EEEE", { locale: ptBR })}
+        {/* Barber Filter - Only for Owner */}
+        {isAdminOrOwner && (
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">Filtrar por barbeiro</h3>
+            </div>
+
+            {barbersLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : !barbers || barbers.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                Nenhum barbeiro cadastrado. Cadastre um barbeiro primeiro.
               </p>
-              <p className="text-2xl font-bold text-primary">
-                {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-              </p>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedBarberId || ""}
+                  onValueChange={handleBarberSelect}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Selecione um barbeiro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {barbers.map((barber) => (
+                      <SelectItem key={barber.id} value={barber.id}>
+                        {barber.name} {!barber.active && "(Inativo)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {selectedBarberId && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleClearSelection}
+                    className="shrink-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Staff: Show which barber they're viewing */}
+        {isStaff && selectedBarber && (
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <span className="text-sm text-muted-foreground">Agenda de:</span>
+              <span className="font-semibold">{selectedBarber.name}</span>
             </div>
-
-            <Button variant="ghost" size="icon" onClick={goToNextDay}>
-              <ChevronRight className="w-5 h-5" />
-            </Button>
           </div>
+        )}
 
-          <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" onClick={goToToday}>
-              Hoje
-            </Button>
+        {/* No barber selected state for Owner */}
+        {isAdminOrOwner && !selectedBarberId && (
+          <div className="text-center py-12 text-muted-foreground glass-card rounded-xl">
+            <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p className="font-medium mb-1">Selecione um barbeiro</p>
+            <p className="text-sm">Escolha um barbeiro acima para ver a agenda</p>
           </div>
-        </div>
+        )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="glass-card rounded-xl p-4 text-center">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-2xl font-bold text-primary">{appointments?.length || 0}</p>
-          </div>
-          <div className="glass-card rounded-xl p-4 text-center">
-            <p className="text-sm text-muted-foreground">Confirmados</p>
-            <p className="text-2xl font-bold text-green-400">
-              {appointments?.filter(a => a.status === "Confirmado").length || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* Appointments List */}
-        <div className="space-y-3">
-          <h2 className="font-semibold flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            Agendamentos
-          </h2>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
-                  <div className="h-5 bg-muted rounded w-1/3 mb-2" />
-                  <div className="h-4 bg-muted rounded w-2/3" />
+        {/* Main Content - Only show when barber is selected */}
+        {selectedBarberId && (
+          <>
+            {/* Date Navigation */}
+            <div className="glass-card rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <Button variant="ghost" size="icon" onClick={goToPreviousDay}>
+                  <ChevronLeft className="w-5 h-5" />
+                </Button>
+                
+                <div className="text-center">
+                  <p className="text-lg font-semibold capitalize">
+                    {format(selectedDate, "EEEE", { locale: ptBR })}
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+                  </p>
                 </div>
-              ))}
+
+                <Button variant="ghost" size="icon" onClick={goToNextDay}>
+                  <ChevronRight className="w-5 h-5" />
+                </Button>
+              </div>
+
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" size="sm" onClick={goToToday}>
+                  Hoje
+                </Button>
+              </div>
             </div>
-          ) : appointments?.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground glass-card rounded-xl">
-              <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhum agendamento para esta data</p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="glass-card rounded-xl p-4 text-center">
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold text-primary">{appointments?.length || 0}</p>
+              </div>
+              <div className="glass-card rounded-xl p-4 text-center">
+                <p className="text-sm text-muted-foreground">Confirmados</p>
+                <p className="text-2xl font-bold text-green-400">
+                  {appointments?.filter(a => a.status === "Confirmado").length || 0}
+                </p>
+              </div>
             </div>
-          ) : (
+
+            {/* Appointments List */}
             <div className="space-y-3">
-              {appointments?.map((apt) => (
-                <div key={apt.id} className="glass-card rounded-xl p-4">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-xl">{apt.time}</span>
-                    </div>
-                    <Select
-                      value={apt.status || "Pendente"}
-                      onValueChange={(value) => handleStatusChange(apt, value as AppointmentStatus)}
-                    >
-                      <SelectTrigger className={`w-auto h-8 text-xs border ${statusColors[apt.status || "Pendente"]}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((status) => (
-                          <SelectItem key={status} value={status}>{status}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <h2 className="font-semibold flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                Agendamentos
+              </h2>
 
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{apt.client_name}</span>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
+                      <div className="h-5 bg-muted rounded w-1/3 mb-2" />
+                      <div className="h-4 bg-muted rounded w-2/3" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>{apt.client_whatsapp}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Scissors className="w-4 h-4 text-muted-foreground" />
-                      <span>{apt.services?.name || "Serviço"}</span>
-                    </div>
-                    <p className="text-muted-foreground">Barbeiro: {apt.barbers?.name || "N/A"}</p>
-                  </div>
-
-                  <div className="flex justify-end mt-4">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir agendamento?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. O agendamento de {apt.client_name} será permanentemente excluído.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(apt.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : appointments?.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground glass-card rounded-xl">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Nenhum agendamento para esta data</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {appointments?.map((apt) => (
+                    <div key={apt.id} className="glass-card rounded-xl p-4">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-primary" />
+                          <span className="font-bold text-xl">{apt.time}</span>
+                        </div>
+                        <Select
+                          value={apt.status || "Pendente"}
+                          onValueChange={(value) => handleStatusChange(apt, value as AppointmentStatus)}
+                        >
+                          <SelectTrigger className={`w-auto h-8 text-xs border ${statusColors[apt.status || "Pendente"]}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions.map((status) => (
+                              <SelectItem key={status} value={status}>{status}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium">{apt.client_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <span>{apt.client_whatsapp}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Scissors className="w-4 h-4 text-muted-foreground" />
+                          <span>{apt.services?.name || "Serviço"}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end mt-4">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Excluir
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir agendamento?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta ação não pode ser desfeita. O agendamento de {apt.client_name} será permanentemente excluído.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(apt.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Payment Method Dialog */}
@@ -276,6 +401,9 @@ const Agenda = () => {
               <DollarSign className="w-5 h-5 text-green-400" />
               Registrar pagamento
             </DialogTitle>
+            <DialogDescription>
+              Selecione a forma de pagamento para concluir o atendimento.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">

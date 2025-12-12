@@ -19,9 +19,9 @@ export interface Appointment {
   barbers?: { name: string } | null;
 }
 
-export function useAppointments(date?: string) {
+export function useAppointments(date?: string, barberId?: string) {
   return useQuery({
-    queryKey: ["appointments", date],
+    queryKey: ["appointments", date, barberId],
     queryFn: async () => {
       let query = supabase
         .from("appointments")
@@ -37,11 +37,16 @@ export function useAppointments(date?: string) {
         query = query.eq("date", date);
       }
 
+      if (barberId) {
+        query = query.eq("barber_id", barberId);
+      }
+
       const { data, error } = await query;
 
       if (error) throw error;
       return data as Appointment[];
     },
+    enabled: !!barberId, // Only fetch when barberId is selected
   });
 }
 
