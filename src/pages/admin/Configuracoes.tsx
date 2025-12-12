@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useShopSettings, WorkingHours, DEFAULT_WORKING_HOURS } from "@/hooks/useShopSettings";
 import { useUpdateShopSettings } from "@/hooks/useShopSettingsMutations";
-import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon } from "lucide-react";
+import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,8 @@ interface SettingsFormData {
   highlight_points: string[];
   working_hours: WorkingHours;
   logo_url: string;
+  hero_secondary_text: string;
+  about_description: string;
 }
 
 const DAYS_OF_WEEK: { key: keyof WorkingHours; label: string }[] = [
@@ -51,6 +53,8 @@ const Configuracoes = () => {
     highlight_points: [],
     working_hours: DEFAULT_WORKING_HOURS,
     logo_url: "",
+    hero_secondary_text: "Agendamento online, rápido e sem precisar mandar mensagem.",
+    about_description: "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
   });
 
   const [highlightText, setHighlightText] = useState("");
@@ -69,6 +73,8 @@ const Configuracoes = () => {
         highlight_points: settings.highlight_points || [],
         working_hours: settings.working_hours || DEFAULT_WORKING_HOURS,
         logo_url: settings.logo_url || "",
+        hero_secondary_text: settings.hero_secondary_text ?? "Agendamento online, rápido e sem precisar mandar mensagem.",
+        about_description: settings.about_description ?? "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
     }
@@ -105,6 +111,8 @@ const Configuracoes = () => {
         id: settings?.id,
         ...formData,
         highlight_points: highlights,
+        hero_secondary_text: formData.hero_secondary_text.trim() || null,
+        about_description: formData.about_description.trim() || null,
       },
       {
         onSuccess: () => {
@@ -146,7 +154,41 @@ const Configuracoes = () => {
           />
         </div>
 
-        {/* Basic Info */}
+        {/* Texts */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Type className="w-5 h-5 text-primary" />
+            Textos do Site
+          </h2>
+
+          <div className="space-y-2">
+            <Label htmlFor="hero_secondary_text">Texto secundário do topo (abaixo do subtítulo)</Label>
+            <Input
+              id="hero_secondary_text"
+              value={formData.hero_secondary_text}
+              onChange={(e) => setFormData({ ...formData, hero_secondary_text: e.target.value })}
+              placeholder="Ex: Agendamento online, rápido e sem precisar mandar mensagem."
+            />
+            <p className="text-xs text-muted-foreground">
+              Deixe vazio para não exibir este texto.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="about_description">Texto da seção "Sobre a Barbearia"</Label>
+            <Textarea
+              id="about_description"
+              value={formData.about_description}
+              onChange={(e) => setFormData({ ...formData, about_description: e.target.value })}
+              placeholder="Descreva sua barbearia..."
+              rows={4}
+            />
+            <p className="text-xs text-muted-foreground">
+              Deixe vazio para não exibir este texto.
+            </p>
+          </div>
+        </div>
+
         <div className="glass-card rounded-xl p-4 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <Settings className="w-5 h-5 text-primary" />

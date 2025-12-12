@@ -274,10 +274,12 @@ export type Database = {
       }
       shop_settings: {
         Row: {
+          about_description: string | null
           address: string | null
           allow_same_day: boolean | null
           close_time: string | null
           created_at: string | null
+          hero_secondary_text: string | null
           highlight_points: string[] | null
           id: string
           logo_url: string | null
@@ -290,10 +292,12 @@ export type Database = {
           working_hours: Json | null
         }
         Insert: {
+          about_description?: string | null
           address?: string | null
           allow_same_day?: boolean | null
           close_time?: string | null
           created_at?: string | null
+          hero_secondary_text?: string | null
           highlight_points?: string[] | null
           id?: string
           logo_url?: string | null
@@ -306,10 +310,12 @@ export type Database = {
           working_hours?: Json | null
         }
         Update: {
+          about_description?: string | null
           address?: string | null
           allow_same_day?: boolean | null
           close_time?: string | null
           created_at?: string | null
+          hero_secondary_text?: string | null
           highlight_points?: string[] | null
           id?: string
           logo_url?: string | null
