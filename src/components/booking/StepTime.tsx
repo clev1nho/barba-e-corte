@@ -3,7 +3,13 @@ import { Check, Clock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSettings, WorkingHours } from "@/hooks/useShopSettings";
 import { Barber } from "@/hooks/useBarbers";
-import { Service } from "@/hooks/useServices";
+
+interface ServiceBase {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  price: number;
+}
 
 interface StepTimeProps {
   settings: ShopSettings | null;
@@ -11,7 +17,7 @@ interface StepTimeProps {
   selectedBarber: Barber | null;
   anyBarber: boolean;
   selectedDate: string;
-  service: Service | null;
+  service: ServiceBase | null;
   selected: string;
   onSelect: (time: string, barber?: Barber) => void;
 }

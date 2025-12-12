@@ -166,11 +166,14 @@ const Barbeiros = () => {
                 Novo Barbeiro
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" aria-describedby="barber-dialog-description">
               <DialogHeader>
                 <DialogTitle>
                   {editingBarber ? "Editar Barbeiro" : "Novo Barbeiro"}
                 </DialogTitle>
+                <p id="barber-dialog-description" className="text-sm text-muted-foreground">
+                  {editingBarber ? "Atualize os dados do barbeiro" : "Preencha os dados do novo barbeiro"}
+                </p>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">

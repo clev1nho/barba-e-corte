@@ -20,8 +20,14 @@ export function useCreateBarber() {
 
   return useMutation({
     mutationFn: async (data: CreateBarberData) => {
-      const { error } = await supabase.from("barbers").insert([data]);
-      if (error) throw error;
+      console.log("Creating barber with data:", data);
+      const { data: result, error } = await supabase.from("barbers").insert([data]).select();
+      if (error) {
+        console.error("Error creating barber:", error);
+        throw error;
+      }
+      console.log("Barber created successfully:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["barbers"] });
@@ -34,8 +40,14 @@ export function useUpdateBarber() {
 
   return useMutation({
     mutationFn: async ({ id, ...data }: UpdateBarberData) => {
-      const { error } = await supabase.from("barbers").update(data).eq("id", id);
-      if (error) throw error;
+      console.log("Updating barber:", id, data);
+      const { data: result, error } = await supabase.from("barbers").update(data).eq("id", id).select();
+      if (error) {
+        console.error("Error updating barber:", error);
+        throw error;
+      }
+      console.log("Barber updated successfully:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["barbers"] });

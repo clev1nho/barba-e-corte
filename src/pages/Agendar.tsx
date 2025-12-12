@@ -9,14 +9,14 @@ import { StepTime } from "@/components/booking/StepTime";
 import { StepClientInfo } from "@/components/booking/StepClientInfo";
 import { StepConfirm } from "@/components/booking/StepConfirm";
 import { BookingSuccess } from "@/components/booking/BookingSuccess";
-import { useServices, Service } from "@/hooks/useServices";
+import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
 import { useBarbers, Barber } from "@/hooks/useBarbers";
 import { useShopSettings } from "@/hooks/useShopSettings";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingData {
-  service: Service | null;
+  service: ServiceWithCategory | null;
   barber: Barber | null;
   anyBarber: boolean;
   date: string;
@@ -41,7 +41,7 @@ const Agendar = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
 
-  const { data: services, isLoading: loadingServices } = useServices();
+  // Services are now loaded inside StepService component
   const { data: barbers, isLoading: loadingBarbers } = useBarbers();
   const { data: settings } = useShopSettings();
   const createAppointment = useCreateAppointment();
@@ -143,8 +143,6 @@ const Agendar = () => {
       <div className="max-w-lg mx-auto px-4 py-6">
         {step === 1 && (
           <StepService
-            services={services ?? []}
-            isLoading={loadingServices}
             selected={bookingData.service}
             onSelect={(service) => {
               updateData({ service });
