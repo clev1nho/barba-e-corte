@@ -21,7 +21,7 @@ export function Hero({ settings }: HeroProps) {
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
       {/* Background image with responsive positioning */}
       <div 
-        className="absolute inset-0 bg-cover bg-[position:85%_10%] md:bg-center"
+        className="absolute inset-0 bg-cover bg-[position:85%_10%] md:bg-[position:75%_50%]"
         style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
       />
       
