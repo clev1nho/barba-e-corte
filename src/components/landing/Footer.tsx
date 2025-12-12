@@ -9,9 +9,17 @@ export function Footer() {
     <footer className="py-8 px-4 border-t border-border">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-gradient-gold flex items-center justify-center">
-            <Scissors className="w-4 h-4 text-primary-foreground" />
-          </div>
+          {settings?.logo_url ? (
+            <img 
+              src={settings.logo_url} 
+              alt={settings?.name || "Logo"} 
+              className="w-8 h-8 rounded-lg object-contain"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-gradient-gold flex items-center justify-center">
+              <Scissors className="w-4 h-4 text-primary-foreground" />
+            </div>
+          )}
           <span className="font-semibold">{settings?.name || "Care For Men"}</span>
         </div>
 
