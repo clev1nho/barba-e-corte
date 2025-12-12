@@ -38,27 +38,27 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
   if (!barbers?.length) return null;
 
   return (
-    <section className="py-16 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold mb-2 text-center">Nossos Barbeiros</h2>
-        <p className="text-muted-foreground text-center mb-8">
+    <section className="py-16 px-0 md:px-4">
+      <div className="w-full max-w-none md:max-w-4xl mx-auto px-0 md:px-0">
+        <h2 className="text-2xl font-bold mb-2 text-center px-4 md:px-0">Nossos Barbeiros</h2>
+        <p className="text-muted-foreground text-center mb-8 px-4 md:px-0">
           Profissionais experientes e dedicados
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-6">
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
-              className="glass-card rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg flex flex-col h-[320px] md:h-[360px]"
+              className="glass-card rounded-none md:rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 md:hover:scale-[1.02] hover:shadow-lg flex flex-col h-[420px] md:h-[360px]"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Image area - fills available space */}
-              <div className="flex-1 overflow-hidden flex items-center justify-center bg-muted/30">
+              <div className="flex-1 overflow-hidden">
                 {barber.photo_url ? (
                   <img
                     src={barber.photo_url}
                     alt={barber.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover object-top md:object-contain md:object-center"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-gold flex items-center justify-center">
