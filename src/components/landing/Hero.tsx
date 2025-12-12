@@ -19,12 +19,14 @@ export function Hero({ settings }: HeroProps) {
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-charcoal via-background to-background" />
+      {/* Background image with responsive positioning */}
+      <div 
+        className="absolute inset-0 bg-cover bg-[position:85%_10%] md:bg-center"
+        style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
+      />
       
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
+      {/* Dark overlay for text legibility */}
+      <div className="absolute inset-0 bg-black/60" />
 
       <div className="relative z-10 text-center max-w-lg mx-auto">
         {/* Logo/Icon */}
