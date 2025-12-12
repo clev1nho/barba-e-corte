@@ -61,17 +61,17 @@ export function CategoriesSection() {
               className="glass-card rounded-xl p-5 text-center transition-all hover:bg-primary/10 hover:border-primary/30 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/20 text-primary mb-3 overflow-hidden">
-                {category.icon_image_url ? (
-                  <img
-                    src={category.icon_image_url}
-                    alt={category.name}
-                    className="w-8 h-8 object-contain"
-                  />
-                ) : (
+              {category.icon_image_url ? (
+                <img
+                  src={category.icon_image_url}
+                  alt={category.name}
+                  className="w-16 h-16 object-contain rounded-md mb-3 mx-auto"
+                />
+              ) : (
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/20 text-primary mb-3">
                   <Scissors className="w-8 h-8" />
-                )}
-              </div>
+                </div>
+              )}
               <h3 className="font-semibold text-sm">{category.name}</h3>
             </div>
           ))}
