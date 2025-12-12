@@ -19,6 +19,33 @@ export interface Appointment {
   barbers?: { name: string } | null;
 }
 
+// Dashboard: fetch all appointments for a date (no barber filter)
+export function useDashboardAppointments(date?: string) {
+  return useQuery({
+    queryKey: ["dashboard-appointments", date],
+    queryFn: async () => {
+      let query = supabase
+        .from("appointments")
+        .select(`
+          *,
+          services(name, price),
+          barbers(name)
+        `)
+        .order("time", { ascending: true });
+
+      if (date) {
+        query = query.eq("date", date);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data as Appointment[];
+    },
+  });
+}
+
+// Agenda: fetch appointments filtered by barber (requires barberId)
 export function useAppointments(date?: string, barberId?: string) {
   return useQuery({
     queryKey: ["appointments", date, barberId],
@@ -30,7 +57,6 @@ export function useAppointments(date?: string, barberId?: string) {
           services(name, price),
           barbers(name)
         `)
-        .order("date", { ascending: true })
         .order("time", { ascending: true });
 
       if (date) {
@@ -46,7 +72,7 @@ export function useAppointments(date?: string, barberId?: string) {
       if (error) throw error;
       return data as Appointment[];
     },
-    enabled: !!barberId, // Only fetch when barberId is selected
+    enabled: !!barberId,
   });
 }
 
