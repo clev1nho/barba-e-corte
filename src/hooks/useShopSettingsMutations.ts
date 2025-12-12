@@ -15,6 +15,7 @@ interface UpdateShopSettingsData {
   slot_interval_minutes?: number;
   highlight_points?: string[];
   working_hours?: WorkingHours;
+  logo_url?: string;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {

@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useShopSettings, WorkingHours, DEFAULT_WORKING_HOURS } from "@/hooks/useShopSettings";
 import { useUpdateShopSettings } from "@/hooks/useShopSettingsMutations";
-import { Settings, MapPin, Phone, Clock, Save, Loader2 } from "lucide-react";
+import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import { LogoUpload } from "@/components/admin/LogoUpload";
 
 interface SettingsFormData {
   name: string;
@@ -21,6 +22,7 @@ interface SettingsFormData {
   slot_interval_minutes: number;
   highlight_points: string[];
   working_hours: WorkingHours;
+  logo_url: string;
 }
 
 const DAYS_OF_WEEK: { key: keyof WorkingHours; label: string }[] = [
@@ -48,6 +50,7 @@ const Configuracoes = () => {
     slot_interval_minutes: 30,
     highlight_points: [],
     working_hours: DEFAULT_WORKING_HOURS,
+    logo_url: "",
   });
 
   const [highlightText, setHighlightText] = useState("");
@@ -65,6 +68,7 @@ const Configuracoes = () => {
         slot_interval_minutes: settings.slot_interval_minutes || 30,
         highlight_points: settings.highlight_points || [],
         working_hours: settings.working_hours || DEFAULT_WORKING_HOURS,
+        logo_url: settings.logo_url || "",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
     }
@@ -127,6 +131,21 @@ const Configuracoes = () => {
   return (
     <AdminLayout title="Configurações">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Visual Identity */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-primary" />
+            Identidade Visual
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            A logo será exibida na página inicial e em todo o site.
+          </p>
+          <LogoUpload
+            currentLogoUrl={formData.logo_url}
+            onLogoChange={(url) => setFormData({ ...formData, logo_url: url })}
+          />
+        </div>
+
         {/* Basic Info */}
         <div className="glass-card rounded-xl p-4 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, MessageCircle, Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,9 +9,13 @@ interface HeroProps {
 }
 
 export function Hero({ settings }: HeroProps) {
+  const [logoError, setLogoError] = useState(false);
+  
   const whatsappLink = settings?.whatsapp
     ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`
     : "#";
+
+  const hasCustomLogo = settings?.logo_url && !logoError;
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
@@ -24,9 +29,18 @@ export function Hero({ settings }: HeroProps) {
       <div className="relative z-10 text-center max-w-lg mx-auto">
         {/* Logo/Icon */}
         <div className="mb-6 animate-float">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-gold shadow-lg shadow-primary/30">
-            <Scissors className="w-10 h-10 text-primary-foreground" />
-          </div>
+          {hasCustomLogo ? (
+            <img
+              src={settings.logo_url!}
+              alt={settings?.name || "Logo"}
+              className="w-24 h-24 mx-auto object-contain rounded-2xl shadow-lg shadow-primary/30"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-gold shadow-lg shadow-primary/30">
+              <Scissors className="w-10 h-10 text-primary-foreground" />
+            </div>
+          )}
         </div>
 
         {/* Title */}

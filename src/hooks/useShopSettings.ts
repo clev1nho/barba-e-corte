@@ -30,6 +30,7 @@ export interface ShopSettings {
   slot_interval_minutes: number | null;
   highlight_points: string[] | null;
   working_hours: WorkingHours | null;
+  logo_url: string | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -94,6 +95,7 @@ export function useShopSettings() {
           slot_interval_minutes: data.slot_interval_minutes,
           highlight_points: data.highlight_points,
           working_hours: workingHours || DEFAULT_WORKING_HOURS,
+          logo_url: data.logo_url,
         } as ShopSettings;
       }
       

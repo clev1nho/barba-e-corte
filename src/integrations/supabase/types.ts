@@ -280,6 +280,7 @@ export type Database = {
           created_at: string | null
           highlight_points: string[] | null
           id: string
+          logo_url: string | null
           name: string
           open_time: string | null
           slot_interval_minutes: number | null
@@ -295,6 +296,7 @@ export type Database = {
           created_at?: string | null
           highlight_points?: string[] | null
           id?: string
+          logo_url?: string | null
           name?: string
           open_time?: string | null
           slot_interval_minutes?: number | null
@@ -310,6 +312,7 @@ export type Database = {
           created_at?: string | null
           highlight_points?: string[] | null
           id?: string
+          logo_url?: string | null
           name?: string
           open_time?: string | null
           slot_interval_minutes?: number | null
