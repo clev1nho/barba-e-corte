@@ -51,7 +51,7 @@ export function Hero({ settings }: HeroProps) {
         </h1>
 
         {/* Subtitle */}
-        <p className="text-lg text-muted-foreground mb-3 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <p className="text-lg text-white font-semibold mb-3 animate-fade-in" style={{ animationDelay: "0.1s" }}>
           {settings?.subtitle || "Cortes de alto nível e atendimento profissional"}
         </p>
 
