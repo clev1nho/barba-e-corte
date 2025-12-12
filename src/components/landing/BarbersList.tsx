@@ -49,23 +49,27 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
-              className="glass-card rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg"
+              className="glass-card rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg flex flex-col h-[320px] md:h-[360px]"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {barber.photo_url ? (
-                <img
-                  src={barber.photo_url}
-                  alt={barber.name}
-                  className="w-full h-auto object-contain md:h-auto md:object-contain"
-                />
-              ) : (
-                <div className="w-full h-64 md:h-[220px] bg-gradient-gold flex items-center justify-center">
-                  <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
-                    {getInitials(barber.name)}
-                  </span>
-                </div>
-              )}
-              <div className="p-4">
+              {/* Image area - fills available space */}
+              <div className="flex-1 overflow-hidden flex items-center justify-center bg-muted/30">
+                {barber.photo_url ? (
+                  <img
+                    src={barber.photo_url}
+                    alt={barber.name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-gold flex items-center justify-center">
+                    <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
+                      {getInitials(barber.name)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {/* Name bar - fixed height at bottom */}
+              <div className="h-16 flex items-center justify-center px-4 shrink-0">
                 <h3 className="font-semibold text-lg text-center">{barber.name}</h3>
               </div>
             </div>
