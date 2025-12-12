@@ -349,24 +349,35 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          barber_id: string | null
           created_at: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          barber_id?: string | null
           created_at?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          barber_id?: string | null
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

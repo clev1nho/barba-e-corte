@@ -11,28 +11,34 @@ export function useAdminAuth() {
   const [role, setRole] = useState<UserRole | null>(null);
   const [checkingRole, setCheckingRole] = useState(false);
 
-  const checkUserRole = async (userId: string): Promise<UserRole | null> => {
+  const [barberId, setBarberId] = useState<string | null>(null);
+
+  const checkUserRole = async (userId: string): Promise<{ role: UserRole | null; barberId: string | null }> => {
     setCheckingRole(true);
     try {
       const { data, error } = await supabase
         .from("user_roles")
-        .select("role")
+        .select("role, barber_id")
         .eq("user_id", userId)
         .single();
 
       if (error) {
         console.error("Error checking role:", error);
         setRole(null);
-        return null;
+        setBarberId(null);
+        return { role: null, barberId: null };
       }
 
       const userRole = data?.role as UserRole;
+      const userBarberId = data?.barber_id as string | null;
       setRole(userRole);
-      return userRole;
+      setBarberId(userBarberId);
+      return { role: userRole, barberId: userBarberId };
     } catch (error) {
       console.error("Error checking user role:", error);
       setRole(null);
-      return null;
+      setBarberId(null);
+      return { role: null, barberId: null };
     } finally {
       setCheckingRole(false);
     }
@@ -50,6 +56,7 @@ export function useAdminAuth() {
           }, 0);
         } else {
           setRole(null);
+          setBarberId(null);
           setLoading(false);
         }
       }
@@ -80,8 +87,8 @@ export function useAdminAuth() {
     }
 
     if (data.user) {
-      const userRole = await checkUserRole(data.user.id);
-      return { error: null, role: userRole };
+      const result = await checkUserRole(data.user.id);
+      return { error: null, role: result.role };
     }
 
     return { error: null, role: null };
@@ -90,6 +97,7 @@ export function useAdminAuth() {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     setRole(null);
+    setBarberId(null);
     return { error };
   };
 
@@ -105,6 +113,7 @@ export function useAdminAuth() {
     session,
     loading: loading || checkingRole,
     role,
+    barberId,
     isAdmin,
     isOwner,
     isStaff,
