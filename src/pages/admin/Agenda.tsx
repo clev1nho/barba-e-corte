@@ -53,7 +53,7 @@ const paymentMethodOptions = [
 ];
 
 const Agenda = () => {
-  const { isStaff, isAdminOrOwner, barberId: staffBarberId, loading: authLoading } = useAdminAuth();
+  const { isStaff, isAdminOrOwner, hasAdminAccess, loading: authLoading } = useAdminAuth();
   const { data: barbers, isLoading: barbersLoading } = useBarbers(false);
   
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -62,28 +62,22 @@ const Agenda = () => {
   const [pendingAppointment, setPendingAppointment] = useState<Appointment | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix");
   
-  // Initialize barber selection based on role
+  // Initialize barber selection from localStorage for both owner and staff
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || barbersLoading) return;
     
-    if (isStaff && staffBarberId) {
-      // Staff: auto-select their linked barber
-      setSelectedBarberId(staffBarberId);
-    } else if (isAdminOrOwner) {
-      // Owner: restore from localStorage or null
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved && barbers?.some(b => b.id === saved)) {
-        setSelectedBarberId(saved);
-      }
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && barbers?.some(b => b.id === saved)) {
+      setSelectedBarberId(saved);
     }
-  }, [authLoading, isStaff, isAdminOrOwner, staffBarberId, barbers]);
+  }, [authLoading, barbersLoading, barbers]);
 
-  // Save owner's selection to localStorage
+  // Save selection to localStorage for both owner and staff
   useEffect(() => {
-    if (isAdminOrOwner && selectedBarberId) {
+    if (hasAdminAccess && selectedBarberId) {
       localStorage.setItem(STORAGE_KEY, selectedBarberId);
     }
-  }, [isAdminOrOwner, selectedBarberId]);
+  }, [hasAdminAccess, selectedBarberId]);
 
   const dateString = format(selectedDate, "yyyy-MM-dd");
   const { data: appointments, isLoading } = useAppointments(dateString, selectedBarberId || undefined);
@@ -168,86 +162,58 @@ const Agenda = () => {
 
   const selectedBarber = barbers?.find(b => b.id === selectedBarberId);
 
-  // Staff without linked barber
-  if (!authLoading && isStaff && !staffBarberId) {
-    return (
-      <AdminLayout title="Agenda">
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Users className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Usuário não vinculado</h2>
-          <p className="text-muted-foreground max-w-md">
-            Seu usuário não está vinculado a um barbeiro. Contate o administrador para configurar seu acesso.
-          </p>
-        </div>
-      </AdminLayout>
-    );
-  }
-
   return (
     <AdminLayout title="Agenda">
       <div className="space-y-6">
-        {/* Barber Filter - Only for Owner */}
-        {isAdminOrOwner && (
-          <div className="glass-card rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Users className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Filtrar por barbeiro</h3>
-            </div>
-
-            {barbersLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : !barbers || barbers.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                Nenhum barbeiro cadastrado. Cadastre um barbeiro primeiro.
-              </p>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Select
-                  value={selectedBarberId || ""}
-                  onValueChange={handleBarberSelect}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecione um barbeiro" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {barbers.map((barber) => (
-                      <SelectItem key={barber.id} value={barber.id}>
-                        {barber.name} {!barber.active && "(Inativo)"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {selectedBarberId && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClearSelection}
-                    className="shrink-0"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                )}
-              </div>
-            )}
+        {/* Barber Filter - For both Owner and Staff */}
+        <div className="glass-card rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Users className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Filtrar por barbeiro</h3>
           </div>
-        )}
 
-        {/* Staff: Show which barber they're viewing */}
-        {isStaff && selectedBarber && (
-          <div className="glass-card rounded-xl p-4">
+          {barbersLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !barbers || barbers.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              Nenhum barbeiro cadastrado. Cadastre um barbeiro primeiro.
+            </p>
+          ) : (
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              <span className="text-sm text-muted-foreground">Agenda de:</span>
-              <span className="font-semibold">{selectedBarber.name}</span>
-            </div>
-          </div>
-        )}
+              <Select
+                value={selectedBarberId || ""}
+                onValueChange={handleBarberSelect}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Selecione um barbeiro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {barbers.map((barber) => (
+                    <SelectItem key={barber.id} value={barber.id}>
+                      {barber.name} {!barber.active && "(Inativo)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {/* No barber selected state for Owner */}
-        {isAdminOrOwner && !selectedBarberId && (
+              {selectedBarberId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleClearSelection}
+                  className="shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* No barber selected state */}
+        {!selectedBarberId && (
           <div className="text-center py-12 text-muted-foreground glass-card rounded-xl">
             <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="font-medium mb-1">Selecione um barbeiro</p>
