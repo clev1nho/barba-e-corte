@@ -32,19 +32,33 @@ export function useUpdateShopSettings() {
         working_hours: workingHoursToJson(working_hours),
       };
       
+      console.log("Saving shop settings:", { id, data });
+      
       if (id) {
         // Update existing record
-        const { error } = await supabase
+        const { data: result, error } = await supabase
           .from("shop_settings")
           .update(data)
-          .eq("id", id);
-        if (error) throw error;
+          .eq("id", id)
+          .select();
+        if (error) {
+          console.error("Error updating shop settings:", error);
+          throw error;
+        }
+        console.log("Shop settings updated:", result);
+        return result;
       } else {
         // Insert new record (upsert logic)
-        const { error } = await supabase
+        const { data: result, error } = await supabase
           .from("shop_settings")
-          .insert(data);
-        if (error) throw error;
+          .insert(data)
+          .select();
+        if (error) {
+          console.error("Error inserting shop settings:", error);
+          throw error;
+        }
+        console.log("Shop settings inserted:", result);
+        return result;
       }
     },
     onSuccess: () => {
