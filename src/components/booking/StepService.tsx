@@ -33,13 +33,19 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
   }
 
   const grouped = groupServicesByCategory(services || []);
-  const categoryOrder = ["Barbearia", "DEPILAÇÃO COM MÁQUINA", "DEPILAÇÃO COM CERA", "Massagens", "ESFOLIAÇÃO"];
+  
+  // Get all category names dynamically from the grouped data, sorted alphabetically
+  const categoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  
+  // Log for debugging
+  console.log("[StepService] Categories loaded:", categoryNames.length, categoryNames);
+  console.log("[StepService] Services loaded:", services?.length || 0);
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold mb-6">Escolha o serviço</h2>
 
-      {categoryOrder.map((categoryName) => {
+      {categoryNames.map((categoryName) => {
         const group = grouped[categoryName];
         if (!group) return null;
         
