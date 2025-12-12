@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type AppRole = "admin" | "user";
+export type UserRole = "admin" | "owner" | "staff" | "user";
 
 export function useAdminAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<UserRole | null>(null);
   const [checkingRole, setCheckingRole] = useState(false);
 
-  const checkAdminRole = async (userId: string) => {
+  const checkUserRole = async (userId: string): Promise<UserRole | null> => {
     setCheckingRole(true);
     try {
       const { data, error } = await supabase
@@ -22,17 +22,17 @@ export function useAdminAuth() {
 
       if (error) {
         console.error("Error checking role:", error);
-        setIsAdmin(false);
-        return false;
+        setRole(null);
+        return null;
       }
 
-      const hasAdminRole = data?.role === "admin";
-      setIsAdmin(hasAdminRole);
-      return hasAdminRole;
+      const userRole = data?.role as UserRole;
+      setRole(userRole);
+      return userRole;
     } catch (error) {
-      console.error("Error checking admin role:", error);
-      setIsAdmin(false);
-      return false;
+      console.error("Error checking user role:", error);
+      setRole(null);
+      return null;
     } finally {
       setCheckingRole(false);
     }
@@ -46,10 +46,10 @@ export function useAdminAuth() {
         
         if (session?.user) {
           setTimeout(() => {
-            checkAdminRole(session.user.id);
+            checkUserRole(session.user.id);
           }, 0);
         } else {
-          setIsAdmin(false);
+          setRole(null);
           setLoading(false);
         }
       }
@@ -60,7 +60,7 @@ export function useAdminAuth() {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminRole(session.user.id).finally(() => setLoading(false));
+        checkUserRole(session.user.id).finally(() => setLoading(false));
       } else {
         setLoading(false);
       }
@@ -76,28 +76,40 @@ export function useAdminAuth() {
     });
 
     if (error) {
-      return { error, isAdmin: false };
+      return { error, role: null };
     }
 
     if (data.user) {
-      const adminStatus = await checkAdminRole(data.user.id);
-      return { error: null, isAdmin: adminStatus };
+      const userRole = await checkUserRole(data.user.id);
+      return { error: null, role: userRole };
     }
 
-    return { error: null, isAdmin: false };
+    return { error: null, role: null };
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    setIsAdmin(false);
+    setRole(null);
     return { error };
   };
+
+  // Helper booleans
+  const isAdmin = role === "admin";
+  const isOwner = role === "owner";
+  const isStaff = role === "staff";
+  const isAdminOrOwner = role === "admin" || role === "owner";
+  const hasAdminAccess = isAdminOrOwner || isStaff;
 
   return {
     user,
     session,
     loading: loading || checkingRole,
+    role,
     isAdmin,
+    isOwner,
+    isStaff,
+    isAdminOrOwner,
+    hasAdminAccess,
     signIn,
     signOut,
     isAuthenticated: !!session,

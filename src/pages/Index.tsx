@@ -1,6 +1,7 @@
 import { Hero } from "@/components/landing/Hero";
 import { About } from "@/components/landing/About";
-import { Benefits } from "@/components/landing/Benefits";
+import { CategoriesSection } from "@/components/landing/CategoriesSection";
+import { GallerySection } from "@/components/landing/GallerySection";
 import { BarbersList } from "@/components/landing/BarbersList";
 import { TestimonialsList } from "@/components/landing/TestimonialsList";
 import { FinalCTA } from "@/components/landing/FinalCTA";
@@ -18,7 +19,8 @@ const Index = () => {
     <main className="min-h-screen bg-background">
       <Hero settings={settings ?? null} />
       <About settings={settings ?? null} />
-      <Benefits settings={settings ?? null} />
+      <CategoriesSection />
+      <GallerySection />
       <BarbersList barbers={barbers ?? []} isLoading={loadingBarbers} />
       <TestimonialsList testimonials={testimonials ?? []} isLoading={loadingTestimonials} />
       <FinalCTA />

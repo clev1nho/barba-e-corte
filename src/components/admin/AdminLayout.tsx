@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { LayoutDashboard, Calendar, Scissors, Users, Settings, LogOut, Home, Loader2, DollarSign } from "lucide-react";
@@ -8,25 +8,37 @@ interface AdminLayoutProps {
   title: string;
 }
 
-const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
-  { icon: Calendar, label: "Agenda", href: "/admin/agenda" },
-  { icon: Scissors, label: "Serviços", href: "/admin/servicos" },
-  { icon: Users, label: "Barbeiros", href: "/admin/barbeiros" },
-  { icon: DollarSign, label: "Financeiro", href: "/admin/financeiro" },
-  { icon: Settings, label: "Config", href: "/admin/configuracoes" },
+const allNavItems = [
+  { icon: LayoutDashboard, label: "Dashboard", href: "/admin", ownerOnly: true },
+  { icon: Calendar, label: "Agenda", href: "/admin/agenda", ownerOnly: false },
+  { icon: Scissors, label: "Serviços", href: "/admin/servicos", ownerOnly: true },
+  { icon: Users, label: "Barbeiros", href: "/admin/barbeiros", ownerOnly: true },
+  { icon: DollarSign, label: "Financeiro", href: "/admin/financeiro", ownerOnly: true },
+  { icon: Settings, label: "Config", href: "/admin/configuracoes", ownerOnly: true },
 ];
 
 export function AdminLayout({ children, title }: AdminLayoutProps) {
-  const { isAuthenticated, isAdmin, loading, signOut } = useAdminAuth();
+  const { isAuthenticated, hasAdminAccess, isAdminOrOwner, isStaff, loading, signOut } = useAdminAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Filter nav items based on role
+  const navItems = useMemo(() => {
+    if (isAdminOrOwner) return allNavItems;
+    return allNavItems.filter(item => !item.ownerOnly);
+  }, [isAdminOrOwner]);
+
   useEffect(() => {
-    if (!loading && (!isAuthenticated || !isAdmin)) {
+    if (!loading && (!isAuthenticated || !hasAdminAccess)) {
       navigate("/admin/login");
+      return;
     }
-  }, [loading, isAuthenticated, isAdmin, navigate]);
+    
+    // Staff trying to access owner-only pages
+    if (!loading && isStaff && location.pathname !== "/admin/agenda") {
+      navigate("/admin/agenda");
+    }
+  }, [loading, isAuthenticated, hasAdminAccess, isStaff, navigate, location.pathname]);
 
   const handleLogout = async () => {
     await signOut();
@@ -45,7 +57,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     );
   }
 
-  if (!isAuthenticated || !isAdmin) return null;
+  if (!isAuthenticated || !hasAdminAccess) return null;
 
   return (
     <div className="min-h-screen bg-background">

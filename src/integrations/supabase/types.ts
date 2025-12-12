@@ -180,38 +180,97 @@ export type Database = {
           },
         ]
       }
+      gallery_images: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          display_order: number | null
+          id: string
+          image_url: string
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_url: string
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string
+        }
+        Relationships: []
+      }
+      service_categories: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean | null
+          category_id: string | null
           created_at: string | null
           description: string | null
           duration_minutes: number
           id: string
           name: string
           price: number
+          subcategory: string | null
           updated_at: string | null
         }
         Insert: {
           active?: boolean | null
+          category_id?: string | null
           created_at?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
           name: string
           price: number
+          subcategory?: string | null
           updated_at?: string | null
         }
         Update: {
           active?: boolean | null
+          category_id?: string | null
           created_at?: string | null
           description?: string | null
           duration_minutes?: number
           id?: string
           name?: string
           price?: number
+          subcategory?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shop_settings: {
         Row: {
@@ -355,9 +414,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin_or_owner: { Args: { _user_id: string }; Returns: boolean }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "owner" | "staff"
       appointment_status:
         | "Pendente"
         | "Confirmado"
@@ -492,7 +553,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "owner", "staff"],
       appointment_status: [
         "Pendente",
         "Confirmado",

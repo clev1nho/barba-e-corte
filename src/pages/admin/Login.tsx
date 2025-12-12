@@ -18,7 +18,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { error, isAdmin } = await signIn(email, password);
+    const { error, role } = await signIn(email, password);
 
     if (error) {
       toast.error("Credenciais inválidas. Tente novamente.");
@@ -26,14 +26,20 @@ const AdminLogin = () => {
       return;
     }
 
-    if (!isAdmin) {
-      toast.error("Acesso negado. Você não possui permissão de administrador.");
+    if (!role || role === "user") {
+      toast.error("Acesso negado. Você não possui permissão de acesso.");
       setLoading(false);
       return;
     }
 
     toast.success("Login realizado com sucesso!");
-    navigate("/admin");
+    
+    // Redirect based on role
+    if (role === "staff") {
+      navigate("/admin/agenda");
+    } else {
+      navigate("/admin");
+    }
   };
 
   return (
