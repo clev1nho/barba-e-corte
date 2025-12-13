@@ -41,8 +41,10 @@ export interface ShopSettings {
   maps_link: string | null;
   hero_bg_desktop_url: string | null;
   hero_bg_mobile_url: string | null;
-  hero_bg_desktop_position: string | null;
-  hero_bg_mobile_position: string | null;
+  hero_bg_desktop_crop_x: number;
+  hero_bg_desktop_crop_y: number;
+  hero_bg_mobile_crop_x: number;
+  hero_bg_mobile_crop_y: number;
   footer_text: string | null;
 }
 
@@ -119,8 +121,10 @@ export function useShopSettings() {
           maps_link: (data as any).maps_link ?? null,
           hero_bg_desktop_url: (data as any).hero_bg_desktop_url ?? null,
           hero_bg_mobile_url: (data as any).hero_bg_mobile_url ?? null,
-          hero_bg_desktop_position: (data as any).hero_bg_desktop_position ?? 'center',
-          hero_bg_mobile_position: (data as any).hero_bg_mobile_position ?? 'center',
+          hero_bg_desktop_crop_x: (data as any).hero_bg_desktop_crop_x ?? 50,
+          hero_bg_desktop_crop_y: (data as any).hero_bg_desktop_crop_y ?? 50,
+          hero_bg_mobile_crop_x: (data as any).hero_bg_mobile_crop_x ?? 50,
+          hero_bg_mobile_crop_y: (data as any).hero_bg_mobile_crop_y ?? 50,
           footer_text: (data as any).footer_text ?? null,
         } as ShopSettings;
       }
