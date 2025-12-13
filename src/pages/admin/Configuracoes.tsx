@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { LogoUpload } from "@/components/admin/LogoUpload";
-import { HeroBackgroundUpload } from "@/components/admin/HeroBackgroundUpload";
+import { HeroCropEditor } from "@/components/admin/HeroCropEditor";
 
 interface SettingsFormData {
   name: string;
@@ -32,8 +32,10 @@ interface SettingsFormData {
   pix_note: string;
   hero_bg_desktop_url: string | null;
   hero_bg_mobile_url: string | null;
-  hero_bg_desktop_position: string;
-  hero_bg_mobile_position: string;
+  hero_bg_desktop_crop_x: number;
+  hero_bg_desktop_crop_y: number;
+  hero_bg_mobile_crop_x: number;
+  hero_bg_mobile_crop_y: number;
   footer_text: string;
 }
 
@@ -71,8 +73,10 @@ const Configuracoes = () => {
     pix_note: "",
     hero_bg_desktop_url: null,
     hero_bg_mobile_url: null,
-    hero_bg_desktop_position: "center",
-    hero_bg_mobile_position: "center",
+    hero_bg_desktop_crop_x: 50,
+    hero_bg_desktop_crop_y: 50,
+    hero_bg_mobile_crop_x: 50,
+    hero_bg_mobile_crop_y: 50,
     footer_text: "",
   });
 
@@ -100,8 +104,10 @@ const Configuracoes = () => {
         pix_note: settings.pix_note || "",
         hero_bg_desktop_url: settings.hero_bg_desktop_url || null,
         hero_bg_mobile_url: settings.hero_bg_mobile_url || null,
-        hero_bg_desktop_position: settings.hero_bg_desktop_position || "center",
-        hero_bg_mobile_position: settings.hero_bg_mobile_position || "center",
+        hero_bg_desktop_crop_x: settings.hero_bg_desktop_crop_x ?? 50,
+        hero_bg_desktop_crop_y: settings.hero_bg_desktop_crop_y ?? 50,
+        hero_bg_mobile_crop_x: settings.hero_bg_mobile_crop_x ?? 50,
+        hero_bg_mobile_crop_y: settings.hero_bg_mobile_crop_y ?? 50,
         footer_text: settings.footer_text || "",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
@@ -147,8 +153,10 @@ const Configuracoes = () => {
         maps_link: formData.maps_link.trim() || null,
         hero_bg_desktop_url: formData.hero_bg_desktop_url || null,
         hero_bg_mobile_url: formData.hero_bg_mobile_url || null,
-        hero_bg_desktop_position: formData.hero_bg_desktop_position || "center",
-        hero_bg_mobile_position: formData.hero_bg_mobile_position || "center",
+        hero_bg_desktop_crop_x: formData.hero_bg_desktop_crop_x,
+        hero_bg_desktop_crop_y: formData.hero_bg_desktop_crop_y,
+        hero_bg_mobile_crop_x: formData.hero_bg_mobile_crop_x,
+        hero_bg_mobile_crop_y: formData.hero_bg_mobile_crop_y,
         footer_text: formData.footer_text.trim() || null,
       },
       {
@@ -191,33 +199,35 @@ const Configuracoes = () => {
           />
         </div>
 
-        {/* Hero Background Images */}
+        {/* Hero Background Images with Crop */}
         <div className="glass-card rounded-xl p-4 space-y-4">
           <h2 className="font-semibold flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-primary" />
             Imagem de fundo da Headline
           </h2>
           <p className="text-sm text-muted-foreground">
-            Configure imagens diferentes para desktop e mobile. Se vazio, o fundo será neutro.
+            Configure imagens diferentes para desktop e mobile. Arraste para ajustar o enquadramento.
           </p>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <HeroBackgroundUpload
+          <div className="grid gap-6 md:grid-cols-2">
+            <HeroCropEditor
               label="Imagem de fundo (Desktop)"
-              currentUrl={formData.hero_bg_desktop_url}
-              position={formData.hero_bg_desktop_position}
-              onUrlChange={(url) => setFormData({ ...formData, hero_bg_desktop_url: url })}
-              onPositionChange={(pos) => setFormData({ ...formData, hero_bg_desktop_position: pos })}
-              bucketFolder="desktop"
+              imageUrl={formData.hero_bg_desktop_url}
+              cropX={formData.hero_bg_desktop_crop_x}
+              cropY={formData.hero_bg_desktop_crop_y}
+              aspectRatio="desktop"
+              onImageChange={(url) => setFormData({ ...formData, hero_bg_desktop_url: url })}
+              onCropChange={(x, y) => setFormData({ ...formData, hero_bg_desktop_crop_x: x, hero_bg_desktop_crop_y: y })}
             />
 
-            <HeroBackgroundUpload
+            <HeroCropEditor
               label="Imagem de fundo (Mobile)"
-              currentUrl={formData.hero_bg_mobile_url}
-              position={formData.hero_bg_mobile_position}
-              onUrlChange={(url) => setFormData({ ...formData, hero_bg_mobile_url: url })}
-              onPositionChange={(pos) => setFormData({ ...formData, hero_bg_mobile_position: pos })}
-              bucketFolder="mobile"
+              imageUrl={formData.hero_bg_mobile_url}
+              cropX={formData.hero_bg_mobile_crop_x}
+              cropY={formData.hero_bg_mobile_crop_y}
+              aspectRatio="mobile"
+              onImageChange={(url) => setFormData({ ...formData, hero_bg_mobile_url: url })}
+              onCropChange={(x, y) => setFormData({ ...formData, hero_bg_mobile_crop_x: x, hero_bg_mobile_crop_y: y })}
             />
           </div>
         </div>

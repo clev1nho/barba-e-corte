@@ -6,13 +6,13 @@ import { ShopSettings } from "@/hooks/useShopSettings";
 
 interface HeroProps {
   settings: ShopSettings | null;
+  isLoading?: boolean;
 }
 
-export function Hero({ settings }: HeroProps) {
+export function Hero({ settings, isLoading }: HeroProps) {
   const [logoError, setLogoError] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   
-  // Detect mobile/desktop for responsive background
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -20,19 +20,31 @@ export function Hero({ settings }: HeroProps) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Show loading skeleton while data is loading
+  if (isLoading) {
+    return (
+      <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden bg-background">
+        <div className="absolute inset-0 bg-muted animate-pulse" />
+      </section>
+    );
+  }
+
   const whatsappLink = settings?.whatsapp
     ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`
     : "#";
 
   const hasCustomLogo = settings?.logo_url && !logoError;
 
-  // Get background image and position based on device
+  // Get background image and crop based on device
   const bgImageUrl = isMobile 
     ? settings?.hero_bg_mobile_url 
     : settings?.hero_bg_desktop_url;
-  const bgPosition = isMobile 
-    ? (settings?.hero_bg_mobile_position || 'center') 
-    : (settings?.hero_bg_desktop_position || 'center');
+  const cropX = isMobile 
+    ? (settings?.hero_bg_mobile_crop_x ?? 50) 
+    : (settings?.hero_bg_desktop_crop_x ?? 50);
+  const cropY = isMobile 
+    ? (settings?.hero_bg_mobile_crop_y ?? 50) 
+    : (settings?.hero_bg_desktop_crop_y ?? 50);
 
   const hasBackgroundImage = bgImageUrl && bgImageUrl.trim().length > 0;
 
@@ -44,14 +56,14 @@ export function Hero({ settings }: HeroProps) {
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{ 
             backgroundImage: `url('${bgImageUrl}')`,
-            backgroundPosition: bgPosition,
+            backgroundPosition: `${cropX}% ${cropY}%`,
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
           }}
         />
       )}
       
-      {/* Dark overlay for text legibility - GPU acceleration */}
+      {/* Dark overlay for text legibility */}
       <div 
         className="absolute inset-0 bg-black/60"
         style={{ 
