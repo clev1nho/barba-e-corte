@@ -27,6 +27,7 @@ export function HeroCropEditor({
 }: HeroCropEditorProps) {
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialCrop, setInitialCrop] = useState({ x: cropX, y: cropY });
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -82,10 +83,13 @@ export function HeroCropEditor({
     onCropChange(50, 50);
   };
 
+  const DRAG_THRESHOLD = 5;
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!imageUrl || !containerRef.current) return;
 
     setIsDragging(true);
+    setHasMoved(false);
     setDragStart({ x: e.clientX, y: e.clientY });
     setInitialCrop({ x: cropX, y: cropY });
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -94,10 +98,19 @@ export function HeroCropEditor({
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging || !containerRef.current) return;
 
-    e.preventDefault();
-
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
+
+    // Only start actual dragging after threshold
+    if (!hasMoved && Math.abs(deltaX) < DRAG_THRESHOLD && Math.abs(deltaY) < DRAG_THRESHOLD) {
+      return;
+    }
+
+    if (!hasMoved) {
+      setHasMoved(true);
+    }
+
+    e.preventDefault();
 
     const containerWidth = containerRef.current.offsetWidth || 1;
     const containerHeight = containerRef.current.offsetHeight || 1;
@@ -114,6 +127,7 @@ export function HeroCropEditor({
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging) return;
     setIsDragging(false);
+    setHasMoved(false);
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
@@ -200,7 +214,7 @@ export function HeroCropEditor({
             Arraste para ajustar o enquadramento
           </p>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 relative z-50">
             <Button
               type="button"
               variant="outline"
