@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Scissors, User, DollarSign, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar, Clock, Scissors, User, DollarSign, Loader2, Copy, Check, QrCode, AlertCircle } from "lucide-react";
 import { BookingData } from "@/pages/Agendar";
+import { useShopSettings } from "@/hooks/useShopSettings";
+import { toast } from "@/hooks/use-toast";
 
 interface StepConfirmProps {
   bookingData: BookingData;
@@ -9,6 +13,14 @@ interface StepConfirmProps {
 }
 
 export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmProps) {
+  const { data: settings } = useShopSettings();
+  const [paidConfirmed, setPaidConfirmed] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const depositAmount = (bookingData.service as any)?.deposit_amount ?? 0;
+  const hasDeposit = depositAmount > 0;
+  const pixConfigured = !!settings?.pix_key_or_link;
+
   const formattedDate = bookingData.date
     ? new Date(bookingData.date + "T12:00:00").toLocaleDateString("pt-BR", {
         weekday: "long",
@@ -17,6 +29,21 @@ export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmPr
         year: "numeric",
       })
     : "";
+
+  const handleCopyPix = async () => {
+    if (!settings?.pix_key_or_link) return;
+    try {
+      await navigator.clipboard.writeText(settings.pix_key_or_link);
+      setCopied(true);
+      toast({ title: "Pix copiado!" });
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast({ title: "Erro ao copiar", variant: "destructive" });
+    }
+  };
+
+  // Button disabled if deposit required but not confirmed paid
+  const confirmDisabled = isLoading || (hasDeposit && pixConfigured && !paidConfirmed);
 
   return (
     <div className="space-y-6">
@@ -95,9 +122,88 @@ export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmPr
         </p>
       </div>
 
+      {/* PIX Deposit Section */}
+      {hasDeposit && (
+        <div className="glass-card rounded-2xl p-5 border-2 border-primary/50 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <QrCode className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-primary">Sinal obrigatório via Pix</h3>
+              <p className="text-sm text-muted-foreground">
+                Para confirmar este agendamento, é necessário pagar o sinal antes.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-primary/10 rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">Valor do sinal:</p>
+            <p className="text-2xl font-bold text-primary">
+              R$ {depositAmount.toFixed(2).replace(".", ",")}
+            </p>
+          </div>
+
+          {pixConfigured ? (
+            <>
+              {settings?.pix_message && (
+                <p className="text-sm">{settings.pix_message}</p>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 gap-2"
+                  onClick={handleCopyPix}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copiar Pix
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {settings?.pix_note && (
+                <p className="text-xs text-muted-foreground">{settings.pix_note}</p>
+              )}
+
+              <div className="flex items-start gap-3 pt-2 border-t border-border">
+                <Checkbox
+                  id="paidConfirmed"
+                  checked={paidConfirmed}
+                  onCheckedChange={(checked) => setPaidConfirmed(checked === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="paidConfirmed" className="text-sm cursor-pointer">
+                  Já paguei o sinal e quero confirmar meu agendamento
+                </label>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-start gap-3 bg-destructive/10 rounded-xl p-4">
+              <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-destructive">Pix ainda não configurado</p>
+                <p className="text-xs text-muted-foreground">
+                  Fale com a barbearia no WhatsApp para combinar o pagamento do sinal.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <Button
         onClick={onConfirm}
-        disabled={isLoading}
+        disabled={confirmDisabled}
         size="lg"
         className="w-full"
       >

@@ -81,30 +81,30 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       {/* Content */}
       <main className="pb-24 px-4 py-6">{children}</main>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - scrollable on mobile */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-area-pb">
-        <div className="flex justify-around py-2">
+        <div className="flex overflow-x-auto scrollbar-hide py-2 px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors ${
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors flex-shrink-0 min-w-[72px] ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
-                <span className="text-[10px]">{item.label}</span>
+                <span className="text-[10px] whitespace-nowrap">{item.label}</span>
               </Link>
             );
           })}
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center gap-1 px-2 py-2 text-muted-foreground hover:text-destructive transition-colors"
+            className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 min-w-[72px]"
           >
             <LogOut className="w-5 h-5" />
-            <span className="text-[10px]">Sair</span>
+            <span className="text-[10px] whitespace-nowrap">Sair</span>
           </button>
         </div>
       </nav>

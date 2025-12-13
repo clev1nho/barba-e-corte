@@ -239,6 +239,7 @@ export type Database = {
           active: boolean | null
           category_id: string | null
           created_at: string | null
+          deposit_amount: number | null
           description: string | null
           duration_minutes: number
           id: string
@@ -251,6 +252,7 @@ export type Database = {
           active?: boolean | null
           category_id?: string | null
           created_at?: string | null
+          deposit_amount?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -263,6 +265,7 @@ export type Database = {
           active?: boolean | null
           category_id?: string | null
           created_at?: string | null
+          deposit_amount?: number | null
           description?: string | null
           duration_minutes?: number
           id?: string
@@ -294,6 +297,9 @@ export type Database = {
           logo_url: string | null
           name: string
           open_time: string | null
+          pix_key_or_link: string | null
+          pix_message: string | null
+          pix_note: string | null
           services_section_subtitle: string | null
           services_section_title: string | null
           slot_interval_minutes: number | null
@@ -314,6 +320,9 @@ export type Database = {
           logo_url?: string | null
           name?: string
           open_time?: string | null
+          pix_key_or_link?: string | null
+          pix_message?: string | null
+          pix_note?: string | null
           services_section_subtitle?: string | null
           services_section_title?: string | null
           slot_interval_minutes?: number | null
@@ -334,6 +343,9 @@ export type Database = {
           logo_url?: string | null
           name?: string
           open_time?: string | null
+          pix_key_or_link?: string | null
+          pix_message?: string | null
+          pix_note?: string | null
           services_section_subtitle?: string | null
           services_section_title?: string | null
           slot_interval_minutes?: number | null

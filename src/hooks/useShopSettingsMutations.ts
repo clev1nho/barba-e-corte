@@ -20,6 +20,9 @@ interface UpdateShopSettingsData {
   about_description?: string | null;
   services_section_title?: string | null;
   services_section_subtitle?: string | null;
+  pix_key_or_link?: string | null;
+  pix_message?: string | null;
+  pix_note?: string | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {

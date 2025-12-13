@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useShopSettings, WorkingHours, DEFAULT_WORKING_HOURS } from "@/hooks/useShopSettings";
 import { useUpdateShopSettings } from "@/hooks/useShopSettingsMutations";
-import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon, Type } from "lucide-react";
+import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon, Type, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,9 @@ interface SettingsFormData {
   logo_url: string;
   hero_secondary_text: string;
   about_description: string;
+  pix_key_or_link: string;
+  pix_message: string;
+  pix_note: string;
 }
 
 const DAYS_OF_WEEK: { key: keyof WorkingHours; label: string }[] = [
@@ -55,6 +58,9 @@ const Configuracoes = () => {
     logo_url: "",
     hero_secondary_text: "Agendamento online, rápido e sem precisar mandar mensagem.",
     about_description: "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
+    pix_key_or_link: "",
+    pix_message: "Envie o sinal e depois marque o checkbox para confirmar.",
+    pix_note: "",
   });
 
   const [highlightText, setHighlightText] = useState("");
@@ -75,6 +81,9 @@ const Configuracoes = () => {
         logo_url: settings.logo_url || "",
         hero_secondary_text: settings.hero_secondary_text ?? "Agendamento online, rápido e sem precisar mandar mensagem.",
         about_description: settings.about_description ?? "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
+        pix_key_or_link: settings.pix_key_or_link || "",
+        pix_message: settings.pix_message || "Envie o sinal e depois marque o checkbox para confirmar.",
+        pix_note: settings.pix_note || "",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
     }
@@ -113,6 +122,9 @@ const Configuracoes = () => {
         highlight_points: highlights,
         hero_secondary_text: formData.hero_secondary_text.trim() || null,
         about_description: formData.about_description.trim() || null,
+        pix_key_or_link: formData.pix_key_or_link.trim() || null,
+        pix_message: formData.pix_message.trim() || null,
+        pix_note: formData.pix_note.trim() || null,
       },
       {
         onSuccess: () => {
@@ -337,6 +349,51 @@ const Configuracoes = () => {
             placeholder="Cortes masculinos premium&#10;Agendamento online 24h&#10;Profissionais experientes"
             rows={4}
           />
+        </div>
+
+        {/* PIX Configuration */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <QrCode className="w-5 h-5 text-primary" />
+            Pagamento via Pix (Sinal)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Configure o Pix para receber o sinal antes de confirmar agendamentos.
+          </p>
+
+          <div className="space-y-2">
+            <Label htmlFor="pix_key_or_link">Chave ou Link do Pix</Label>
+            <Input
+              id="pix_key_or_link"
+              value={formData.pix_key_or_link}
+              onChange={(e) => setFormData({ ...formData, pix_key_or_link: e.target.value })}
+              placeholder="Ex: 00020126580014br.gov.bcb.pix... ou sua chave"
+            />
+            <p className="text-xs text-muted-foreground">
+              Cole aqui o código Pix "copia e cola" ou a chave Pix.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pix_message">Mensagem do Pix</Label>
+            <Textarea
+              id="pix_message"
+              value={formData.pix_message}
+              onChange={(e) => setFormData({ ...formData, pix_message: e.target.value })}
+              placeholder="Envie o sinal e depois marque o checkbox para confirmar."
+              rows={2}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pix_note">Observação (opcional)</Label>
+            <Input
+              id="pix_note"
+              value={formData.pix_note}
+              onChange={(e) => setFormData({ ...formData, pix_note: e.target.value })}
+              placeholder="Ex: Após o pagamento, aguarde confirmação no WhatsApp."
+            />
+          </div>
         </div>
 
         {/* Submit */}
