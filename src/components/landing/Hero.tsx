@@ -31,9 +31,10 @@ export function Hero({ settings, isLoading }: HeroProps) {
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
       {/* Background image - hardcoded */}
       <div 
-        className="absolute inset-0 bg-cover bg-no-repeat bg-center"
+        className="absolute inset-0 bg-cover bg-no-repeat"
         style={{ 
           backgroundImage: `url('/images/hero-bg.jpg')`,
+          backgroundPosition: '90% 10%',
         }}
       />
       
