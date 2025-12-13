@@ -39,13 +39,8 @@ export interface ShopSettings {
   pix_message: string | null;
   pix_note: string | null;
   maps_link: string | null;
-  hero_bg_desktop_url: string | null;
-  hero_bg_mobile_url: string | null;
-  hero_bg_desktop_crop_x: number;
-  hero_bg_desktop_crop_y: number;
-  hero_bg_mobile_crop_x: number;
-  hero_bg_mobile_crop_y: number;
   footer_text: string | null;
+  opening_hours: string | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -119,13 +114,8 @@ export function useShopSettings() {
           pix_message: (data as any).pix_message ?? null,
           pix_note: (data as any).pix_note ?? null,
           maps_link: (data as any).maps_link ?? null,
-          hero_bg_desktop_url: (data as any).hero_bg_desktop_url ?? null,
-          hero_bg_mobile_url: (data as any).hero_bg_mobile_url ?? null,
-          hero_bg_desktop_crop_x: (data as any).hero_bg_desktop_crop_x ?? 50,
-          hero_bg_desktop_crop_y: (data as any).hero_bg_desktop_crop_y ?? 50,
-          hero_bg_mobile_crop_x: (data as any).hero_bg_mobile_crop_x ?? 50,
-          hero_bg_mobile_crop_y: (data as any).hero_bg_mobile_crop_y ?? 50,
           footer_text: (data as any).footer_text ?? null,
+          opening_hours: (data as any).opening_hours ?? null,
         } as ShopSettings;
       }
       

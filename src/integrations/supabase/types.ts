@@ -307,6 +307,7 @@ export type Database = {
           maps_link: string | null
           name: string
           open_time: string | null
+          opening_hours: string | null
           pix_key_or_link: string | null
           pix_message: string | null
           pix_note: string | null
@@ -340,6 +341,7 @@ export type Database = {
           maps_link?: string | null
           name?: string
           open_time?: string | null
+          opening_hours?: string | null
           pix_key_or_link?: string | null
           pix_message?: string | null
           pix_note?: string | null
@@ -373,6 +375,7 @@ export type Database = {
           maps_link?: string | null
           name?: string
           open_time?: string | null
+          opening_hours?: string | null
           pix_key_or_link?: string | null
           pix_message?: string | null
           pix_note?: string | null

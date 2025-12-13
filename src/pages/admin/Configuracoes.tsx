@@ -30,6 +30,7 @@ interface SettingsFormData {
   pix_message: string;
   pix_note: string;
   footer_text: string;
+  opening_hours: string;
 }
 
 const DAYS_OF_WEEK: { key: keyof WorkingHours; label: string }[] = [
@@ -65,6 +66,7 @@ const Configuracoes = () => {
     pix_message: "Envie o sinal e depois marque o checkbox para confirmar.",
     pix_note: "",
     footer_text: "",
+    opening_hours: "",
   });
 
   const [highlightText, setHighlightText] = useState("");
@@ -90,6 +92,7 @@ const Configuracoes = () => {
         pix_message: settings.pix_message || "Envie o sinal e depois marque o checkbox para confirmar.",
         pix_note: settings.pix_note || "",
         footer_text: settings.footer_text || "",
+        opening_hours: settings.opening_hours || "",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
     }
@@ -133,6 +136,7 @@ const Configuracoes = () => {
         pix_note: formData.pix_note.trim() || null,
         maps_link: formData.maps_link.trim() || null,
         footer_text: formData.footer_text.trim() || null,
+        opening_hours: formData.opening_hours.trim() || null,
       },
       {
         onSuccess: () => {
@@ -371,6 +375,26 @@ const Configuracoes = () => {
             placeholder="Cortes masculinos premium&#10;Agendamento online 24h&#10;Profissionais experientes"
             rows={4}
           />
+        </div>
+
+        {/* Opening Hours for Hero */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Clock className="w-5 h-5 text-primary" />
+            Horário de Funcionamento (exibido na Hero)
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Texto livre exibido no card de horário da página inicial.
+          </p>
+          <Input
+            id="opening_hours"
+            value={formData.opening_hours}
+            onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
+            placeholder="Ex: Segunda a Sábado • 13:00 às 23:00"
+          />
+          <p className="text-xs text-muted-foreground">
+            Deixe vazio para não exibir o card de horário na Hero.
+          </p>
         </div>
 
         {/* Footer Text */}
