@@ -24,6 +24,11 @@ interface UpdateShopSettingsData {
   pix_message?: string | null;
   pix_note?: string | null;
   maps_link?: string | null;
+  hero_bg_desktop_url?: string | null;
+  hero_bg_mobile_url?: string | null;
+  hero_bg_desktop_position?: string | null;
+  hero_bg_mobile_position?: string | null;
+  footer_text?: string | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {

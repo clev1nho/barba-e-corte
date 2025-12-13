@@ -291,6 +291,11 @@ export type Database = {
           allow_same_day: boolean | null
           close_time: string | null
           created_at: string | null
+          footer_text: string | null
+          hero_bg_desktop_position: string | null
+          hero_bg_desktop_url: string | null
+          hero_bg_mobile_position: string | null
+          hero_bg_mobile_url: string | null
           hero_secondary_text: string | null
           highlight_points: string[] | null
           id: string
@@ -315,6 +320,11 @@ export type Database = {
           allow_same_day?: boolean | null
           close_time?: string | null
           created_at?: string | null
+          footer_text?: string | null
+          hero_bg_desktop_position?: string | null
+          hero_bg_desktop_url?: string | null
+          hero_bg_mobile_position?: string | null
+          hero_bg_mobile_url?: string | null
           hero_secondary_text?: string | null
           highlight_points?: string[] | null
           id?: string
@@ -339,6 +349,11 @@ export type Database = {
           allow_same_day?: boolean | null
           close_time?: string | null
           created_at?: string | null
+          footer_text?: string | null
+          hero_bg_desktop_position?: string | null
+          hero_bg_desktop_url?: string | null
+          hero_bg_mobile_position?: string | null
+          hero_bg_mobile_url?: string | null
           hero_secondary_text?: string | null
           highlight_points?: string[] | null
           id?: string

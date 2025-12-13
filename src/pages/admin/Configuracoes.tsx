@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useShopSettings, WorkingHours, DEFAULT_WORKING_HOURS } from "@/hooks/useShopSettings";
 import { useUpdateShopSettings } from "@/hooks/useShopSettingsMutations";
-import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon, Type, QrCode } from "lucide-react";
+import { Settings, MapPin, Phone, Clock, Save, Loader2, ImageIcon, Type, QrCode, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { LogoUpload } from "@/components/admin/LogoUpload";
+import { HeroBackgroundUpload } from "@/components/admin/HeroBackgroundUpload";
 
 interface SettingsFormData {
   name: string;
@@ -29,6 +30,11 @@ interface SettingsFormData {
   pix_key_or_link: string;
   pix_message: string;
   pix_note: string;
+  hero_bg_desktop_url: string | null;
+  hero_bg_mobile_url: string | null;
+  hero_bg_desktop_position: string;
+  hero_bg_mobile_position: string;
+  footer_text: string;
 }
 
 const DAYS_OF_WEEK: { key: keyof WorkingHours; label: string }[] = [
@@ -63,6 +69,11 @@ const Configuracoes = () => {
     pix_key_or_link: "",
     pix_message: "Envie o sinal e depois marque o checkbox para confirmar.",
     pix_note: "",
+    hero_bg_desktop_url: null,
+    hero_bg_mobile_url: null,
+    hero_bg_desktop_position: "center",
+    hero_bg_mobile_position: "center",
+    footer_text: "",
   });
 
   const [highlightText, setHighlightText] = useState("");
@@ -87,6 +98,11 @@ const Configuracoes = () => {
         pix_key_or_link: settings.pix_key_or_link || "",
         pix_message: settings.pix_message || "Envie o sinal e depois marque o checkbox para confirmar.",
         pix_note: settings.pix_note || "",
+        hero_bg_desktop_url: settings.hero_bg_desktop_url || null,
+        hero_bg_mobile_url: settings.hero_bg_mobile_url || null,
+        hero_bg_desktop_position: settings.hero_bg_desktop_position || "center",
+        hero_bg_mobile_position: settings.hero_bg_mobile_position || "center",
+        footer_text: settings.footer_text || "",
       });
       setHighlightText((settings.highlight_points || []).join("\n"));
     }
@@ -129,6 +145,11 @@ const Configuracoes = () => {
         pix_message: formData.pix_message.trim() || null,
         pix_note: formData.pix_note.trim() || null,
         maps_link: formData.maps_link.trim() || null,
+        hero_bg_desktop_url: formData.hero_bg_desktop_url || null,
+        hero_bg_mobile_url: formData.hero_bg_mobile_url || null,
+        hero_bg_desktop_position: formData.hero_bg_desktop_position || "center",
+        hero_bg_mobile_position: formData.hero_bg_mobile_position || "center",
+        footer_text: formData.footer_text.trim() || null,
       },
       {
         onSuccess: () => {
@@ -168,6 +189,37 @@ const Configuracoes = () => {
             currentLogoUrl={formData.logo_url}
             onLogoChange={(url) => setFormData({ ...formData, logo_url: url })}
           />
+        </div>
+
+        {/* Hero Background Images */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-primary" />
+            Imagem de fundo da Headline
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Configure imagens diferentes para desktop e mobile. Se vazio, o fundo será neutro.
+          </p>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <HeroBackgroundUpload
+              label="Imagem de fundo (Desktop)"
+              currentUrl={formData.hero_bg_desktop_url}
+              position={formData.hero_bg_desktop_position}
+              onUrlChange={(url) => setFormData({ ...formData, hero_bg_desktop_url: url })}
+              onPositionChange={(pos) => setFormData({ ...formData, hero_bg_desktop_position: pos })}
+              bucketFolder="desktop"
+            />
+
+            <HeroBackgroundUpload
+              label="Imagem de fundo (Mobile)"
+              currentUrl={formData.hero_bg_mobile_url}
+              position={formData.hero_bg_mobile_position}
+              onUrlChange={(url) => setFormData({ ...formData, hero_bg_mobile_url: url })}
+              onPositionChange={(pos) => setFormData({ ...formData, hero_bg_mobile_position: pos })}
+              bucketFolder="mobile"
+            />
+          </div>
         </div>
 
         {/* Texts */}
@@ -366,6 +418,26 @@ const Configuracoes = () => {
             placeholder="Cortes masculinos premium&#10;Agendamento online 24h&#10;Profissionais experientes"
             rows={4}
           />
+        </div>
+
+        {/* Footer Text */}
+        <div className="glass-card rounded-xl p-4 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2">
+            <FileText className="w-5 h-5 text-primary" />
+            Texto do Rodapé
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Personalize o texto exibido no rodapé do site.
+          </p>
+          <Input
+            id="footer_text"
+            value={formData.footer_text}
+            onChange={(e) => setFormData({ ...formData, footer_text: e.target.value })}
+            placeholder="Ex: © 2025 Care For Men. Todos os direitos reservados."
+          />
+          <p className="text-xs text-muted-foreground">
+            Deixe vazio para não exibir texto no rodapé.
+          </p>
         </div>
 
         {/* PIX Configuration */}
