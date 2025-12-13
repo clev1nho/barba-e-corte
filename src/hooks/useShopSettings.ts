@@ -38,6 +38,7 @@ export interface ShopSettings {
   pix_key_or_link: string | null;
   pix_message: string | null;
   pix_note: string | null;
+  maps_link: string | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -110,6 +111,7 @@ export function useShopSettings() {
           pix_key_or_link: (data as any).pix_key_or_link ?? null,
           pix_message: (data as any).pix_message ?? null,
           pix_note: (data as any).pix_note ?? null,
+          maps_link: (data as any).maps_link ?? null,
         } as ShopSettings;
       }
       
