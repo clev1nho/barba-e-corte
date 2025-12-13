@@ -92,13 +92,15 @@ export function Hero({ settings, isLoading }: HeroProps) {
           </a>
         </div>
 
-        {/* Quick info card */}
-        <div className="mt-10 glass-card rounded-2xl p-4 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <p className="text-xs text-muted-foreground mb-2">Horário de funcionamento</p>
-          <p className="text-lg font-semibold text-primary">
-            {settings?.open_time || "09:00"} - {settings?.close_time || "19:00"}
-          </p>
-        </div>
+        {/* Quick info card - only show if opening_hours is set */}
+        {settings?.opening_hours && settings.opening_hours.trim().length > 0 && (
+          <div className="mt-10 glass-card rounded-2xl p-4 animate-slide-up" style={{ animationDelay: "0.4s" }}>
+            <p className="text-xs text-muted-foreground mb-2">Horário de funcionamento</p>
+            <p className="text-lg font-semibold text-primary">
+              {settings.opening_hours}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

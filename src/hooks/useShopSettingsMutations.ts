@@ -25,6 +25,7 @@ interface UpdateShopSettingsData {
   pix_note?: string | null;
   maps_link?: string | null;
   footer_text?: string | null;
+  opening_hours?: string | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {
