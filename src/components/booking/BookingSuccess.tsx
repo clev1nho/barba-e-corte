@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, MessageCircle, Home, Calendar } from "lucide-react";
+import { CheckCircle, MessageCircle, Home, Calendar, AlertCircle } from "lucide-react";
 import { BookingData } from "@/pages/Agendar";
 import { ShopSettings } from "@/hooks/useShopSettings";
 
@@ -12,8 +12,17 @@ interface BookingSuccessProps {
   onWhatsAppRedirected?: () => void;
 }
 
-// Fixed WhatsApp number for the barbershop
-const WHATSAPP_NUMBER = "5531985145431";
+// Clean phone number: remove spaces, parentheses, dashes, ensure DDI 55
+function cleanWhatsAppNumber(phone: string | null | undefined): string {
+  if (!phone) return "";
+  // Remove all non-digit characters
+  let cleaned = phone.replace(/\D/g, "");
+  // Ensure DDI 55 for Brazil if not present
+  if (cleaned.length === 10 || cleaned.length === 11) {
+    cleaned = "55" + cleaned;
+  }
+  return cleaned;
+}
 
 export function BookingSuccess({ 
   bookingData, 
@@ -39,22 +48,25 @@ export function BookingSuccess({
       })
     : "";
 
+  // Get cleaned WhatsApp number from settings
+  const whatsappNumber = cleanWhatsAppNumber(settings?.whatsapp);
+  const hasWhatsApp = whatsappNumber.length > 0;
+
   const whatsappMessage = encodeURIComponent(
-    `Olá, acabei de fazer um agendamento pelo aplicativo.\n\n` +
     `👤 Nome: ${bookingData.clientName}\n` +
     `✂️ Serviço: ${bookingData.service?.name}\n` +
     `💈 Barbeiro: ${bookingData.barber?.name}\n` +
     `📅 Data: ${shortDate}\n` +
-    `🕐 Horário: ${bookingData.time}\n` +
-    (appointmentId ? `🔖 Código: ${appointmentId.slice(0, 8).toUpperCase()}\n` : "") +
-    `\nPoderia confirmar pra mim, por favor?`
+    `⏰ Horário: ${bookingData.time}\n\n` +
+    `Para confirmar, envie aqui no WhatsApp a foto do comprovante do sinal.\n` +
+    `O valor do sinal será abatido do valor total.`
   );
 
-  const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
+  const whatsappLink = hasWhatsApp ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}` : "";
 
-  // Auto-redirect to WhatsApp after success
+  // Auto-redirect to WhatsApp after success (only if WhatsApp is configured)
   useEffect(() => {
-    if (!hasRedirected.current) {
+    if (!hasRedirected.current && hasWhatsApp) {
       hasRedirected.current = true;
       
       // Small delay to show success screen before redirect
@@ -144,12 +156,19 @@ export function BookingSuccess({
 
         {/* Actions */}
         <div className="space-y-3 animate-slide-up" style={{ animationDelay: "0.4s" }}>
+        {hasWhatsApp ? (
           <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="block">
             <Button variant="default" size="lg" className="w-full">
               <MessageCircle className="w-5 h-5" />
               Confirmar no WhatsApp
             </Button>
           </a>
+        ) : (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>WhatsApp não configurado no admin.</span>
+          </div>
+        )}
 
           <Link to="/">
             <Button variant="outline" size="lg" className="w-full">
