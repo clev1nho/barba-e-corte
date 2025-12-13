@@ -33,6 +33,7 @@ interface ServiceFormData {
   description: string;
   duration_minutes: number;
   price: number;
+  deposit_amount: number;
   active: boolean;
 }
 
@@ -41,6 +42,7 @@ const emptyForm: ServiceFormData = {
   description: "",
   duration_minutes: 30,
   price: 0,
+  deposit_amount: 0,
   active: true,
 };
 
@@ -67,6 +69,7 @@ const Servicos = () => {
       description: service.description || "",
       duration_minutes: service.duration_minutes,
       price: service.price,
+      deposit_amount: (service as any).deposit_amount ?? 0,
       active: service.active ?? true,
     });
     setIsDialogOpen(true);
@@ -203,6 +206,24 @@ const Servicos = () => {
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="deposit_amount">Sinal (R$)</Label>
+                  <Input
+                    id="deposit_amount"
+                    type="text"
+                    inputMode="decimal"
+                    value={formData.deposit_amount === 0 ? "" : formData.deposit_amount.toString()}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                        setFormData({ ...formData, deposit_amount: value === "" ? 0 : parseFloat(value) || 0 });
+                      }
+                    }}
+                    placeholder="0.00"
+                  />
+                  <p className="text-xs text-muted-foreground">Valor do sinal obrigatório via Pix. Deixe 0 para não exigir.</p>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <Label htmlFor="active">Ativo</Label>
                   <Switch
@@ -261,7 +282,7 @@ const Servicos = () => {
                     {service.description && (
                       <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
                     )}
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-4 text-sm flex-wrap">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Clock className="w-4 h-4" />
                         {service.duration_minutes} min
@@ -270,6 +291,11 @@ const Servicos = () => {
                         <DollarSign className="w-4 h-4" />
                         R$ {service.price.toFixed(2)}
                       </span>
+                      {(service as any).deposit_amount > 0 && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                          Sinal: R$ {((service as any).deposit_amount as number).toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </div>
 
