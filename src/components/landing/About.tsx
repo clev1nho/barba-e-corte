@@ -7,9 +7,9 @@ interface AboutProps {
 }
 
 export function About({ settings }: AboutProps) {
-  const mapsLink = settings?.address
-    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings.address)}`
-    : "#";
+  // Use configurable maps_link if available, otherwise hide the button
+  const mapsLink = settings?.maps_link?.trim() || "";
+  const hasMapsLink = mapsLink.length > 0;
 
   return (
     <section className="py-16 px-4">
@@ -17,8 +17,8 @@ export function About({ settings }: AboutProps) {
         <h2 className="text-2xl font-bold mb-6 text-center">Sobre a Barbearia</h2>
 
         <div className="glass-card rounded-2xl p-6">
-          {/* About description - only render if text exists */}
-          {(settings?.about_description !== null && settings?.about_description !== undefined && settings?.about_description !== "") && (
+          {/* About description - only render if text exists and has content after trim */}
+          {settings?.about_description && settings.about_description.trim().length > 0 && (
             <p className="text-muted-foreground mb-6 leading-relaxed">
               {settings.about_description}
             </p>
@@ -32,12 +32,14 @@ export function About({ settings }: AboutProps) {
             </div>
           </div>
 
-          <a href={mapsLink} target="_blank" rel="noopener noreferrer" className="block mt-4">
-            <Button variant="outline" className="w-full">
-              <ExternalLink className="w-4 h-4" />
-              Ver localização no mapa
-            </Button>
-          </a>
+          {hasMapsLink && (
+            <a href={mapsLink} target="_blank" rel="noreferrer" className="block mt-4">
+              <Button variant="outline" className="w-full">
+                <ExternalLink className="w-4 h-4" />
+                Ver localização no mapa
+              </Button>
+            </a>
+          )}
         </div>
       </div>
     </section>

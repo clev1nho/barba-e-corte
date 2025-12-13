@@ -16,6 +16,7 @@ interface SettingsFormData {
   subtitle: string;
   whatsapp: string;
   address: string;
+  maps_link: string;
   open_time: string;
   close_time: string;
   allow_same_day: boolean;
@@ -49,6 +50,7 @@ const Configuracoes = () => {
     subtitle: "",
     whatsapp: "",
     address: "",
+    maps_link: "",
     open_time: "09:00",
     close_time: "19:00",
     allow_same_day: true,
@@ -56,8 +58,8 @@ const Configuracoes = () => {
     highlight_points: [],
     working_hours: DEFAULT_WORKING_HOURS,
     logo_url: "",
-    hero_secondary_text: "Agendamento online, rápido e sem precisar mandar mensagem.",
-    about_description: "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
+    hero_secondary_text: "",
+    about_description: "",
     pix_key_or_link: "",
     pix_message: "Envie o sinal e depois marque o checkbox para confirmar.",
     pix_note: "",
@@ -72,6 +74,7 @@ const Configuracoes = () => {
         subtitle: settings.subtitle || "",
         whatsapp: settings.whatsapp || "",
         address: settings.address || "",
+        maps_link: settings.maps_link || "",
         open_time: settings.open_time || "09:00",
         close_time: settings.close_time || "19:00",
         allow_same_day: settings.allow_same_day ?? true,
@@ -79,8 +82,8 @@ const Configuracoes = () => {
         highlight_points: settings.highlight_points || [],
         working_hours: settings.working_hours || DEFAULT_WORKING_HOURS,
         logo_url: settings.logo_url || "",
-        hero_secondary_text: settings.hero_secondary_text ?? "Agendamento online, rápido e sem precisar mandar mensagem.",
-        about_description: settings.about_description ?? "Nossa barbearia oferece uma experiência única em cuidados masculinos. Combinamos técnicas tradicionais com tendências modernas para entregar cortes impecáveis e atendimento de primeira classe.",
+        hero_secondary_text: settings.hero_secondary_text || "",
+        about_description: settings.about_description || "",
         pix_key_or_link: settings.pix_key_or_link || "",
         pix_message: settings.pix_message || "Envie o sinal e depois marque o checkbox para confirmar.",
         pix_note: settings.pix_note || "",
@@ -125,6 +128,7 @@ const Configuracoes = () => {
         pix_key_or_link: formData.pix_key_or_link.trim() || null,
         pix_message: formData.pix_message.trim() || null,
         pix_note: formData.pix_note.trim() || null,
+        maps_link: formData.maps_link.trim() || null,
       },
       {
         onSuccess: () => {
@@ -260,6 +264,19 @@ const Configuracoes = () => {
               placeholder="Rua, número, bairro..."
               rows={2}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="maps_link">Link da localização (Google Maps)</Label>
+            <Input
+              id="maps_link"
+              value={formData.maps_link}
+              onChange={(e) => setFormData({ ...formData, maps_link: e.target.value })}
+              placeholder="https://maps.google.com/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Cole aqui o link do Google Maps. Se deixar vazio, o botão "Ver localização" não será exibido.
+            </p>
           </div>
         </div>
 

@@ -19,14 +19,24 @@ export function Hero({ settings }: HeroProps) {
 
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
-      {/* Background image with responsive positioning */}
+      {/* Background image with responsive positioning - GPU acceleration to prevent glitches */}
       <div 
         className="absolute inset-0 bg-cover bg-[position:85%_10%] md:bg-[position:75%_50%]"
-        style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
+        style={{ 
+          backgroundImage: "url('/images/hero-bg.jpg')",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+        }}
       />
       
-      {/* Dark overlay for text legibility */}
-      <div className="absolute inset-0 bg-black/60" />
+      {/* Dark overlay for text legibility - GPU acceleration */}
+      <div 
+        className="absolute inset-0 bg-black/60"
+        style={{ 
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+        }}
+      />
 
       <div className="relative z-10 text-center max-w-lg mx-auto">
         {/* Logo/Icon */}
@@ -55,8 +65,8 @@ export function Hero({ settings }: HeroProps) {
           {settings?.subtitle || "Cortes de alto nível e atendimento profissional"}
         </p>
 
-        {/* Description - only render if text exists */}
-        {(settings?.hero_secondary_text !== null && settings?.hero_secondary_text !== undefined && settings?.hero_secondary_text !== "") && (
+        {/* Description - only render if text exists and has content after trim */}
+        {settings?.hero_secondary_text && settings.hero_secondary_text.trim().length > 0 && (
           <p className="text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             {settings.hero_secondary_text}
           </p>

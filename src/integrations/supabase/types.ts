@@ -295,6 +295,7 @@ export type Database = {
           highlight_points: string[] | null
           id: string
           logo_url: string | null
+          maps_link: string | null
           name: string
           open_time: string | null
           pix_key_or_link: string | null
@@ -318,6 +319,7 @@ export type Database = {
           highlight_points?: string[] | null
           id?: string
           logo_url?: string | null
+          maps_link?: string | null
           name?: string
           open_time?: string | null
           pix_key_or_link?: string | null
@@ -341,6 +343,7 @@ export type Database = {
           highlight_points?: string[] | null
           id?: string
           logo_url?: string | null
+          maps_link?: string | null
           name?: string
           open_time?: string | null
           pix_key_or_link?: string | null

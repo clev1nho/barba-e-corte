@@ -23,6 +23,7 @@ interface UpdateShopSettingsData {
   pix_key_or_link?: string | null;
   pix_message?: string | null;
   pix_note?: string | null;
+  maps_link?: string | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {
