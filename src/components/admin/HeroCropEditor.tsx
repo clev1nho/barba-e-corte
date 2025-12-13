@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,48 +29,51 @@ export function HeroCropEditor({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialCrop, setInitialCrop] = useState({ x: cropX, y: cropY });
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Aspect ratios for preview
-  const previewHeight = aspectRatio === "desktop" ? 200 : 280;
-  const previewWidth = aspectRatio === "desktop" ? 400 : 200;
+  const previewAspectClass =
+    aspectRatio === "desktop" ? "aspect-[16/6]" : "aspect-[9/16]";
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleUpload = async (file?: File) => {
+    const targetFile = file ?? fileInputRef.current?.files?.[0];
+    if (!targetFile) return;
 
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) {
+    if (!validTypes.includes(targetFile.type)) {
       toast.error("Formato inválido. Use JPG, PNG ou WebP.");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (targetFile.size > 5 * 1024 * 1024) {
       toast.error("Imagem muito grande. Máximo 5MB.");
       return;
     }
 
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
+      const ext = targetFile.name.split(".").pop();
       const fileName = `hero-${aspectRatio}-${Date.now()}.${ext}`;
       const filePath = `hero/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("logos")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, targetFile, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from("logos").getPublicUrl(filePath);
       onImageChange(data.publicUrl);
-      onCropChange(50, 50); // Reset crop to center
+      onCropChange(50, 50);
       toast.success("Imagem enviada!");
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Erro ao enviar imagem.");
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -79,76 +82,72 @@ export function HeroCropEditor({
     onCropChange(50, 50);
   };
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (!imageUrl) return;
-      e.preventDefault();
-      setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-      setInitialCrop({ x: cropX, y: cropY });
-    },
-    [imageUrl, cropX, cropY]
-  );
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!imageUrl || !containerRef.current) return;
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging || !containerRef.current) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setInitialCrop({ x: cropX, y: cropY });
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
 
-      const deltaX = e.clientX - dragStart.x;
-      const deltaY = e.clientY - dragStart.y;
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging || !containerRef.current) return;
 
-      // Convert pixel movement to percentage (inverted for natural feel)
-      const containerWidth = containerRef.current.offsetWidth;
-      const containerHeight = containerRef.current.offsetHeight;
+    e.preventDefault();
 
-      const percentX = (deltaX / containerWidth) * 100;
-      const percentY = (deltaY / containerHeight) * 100;
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
 
-      // Invert: dragging right moves image left (shows more right side)
-      const newX = Math.max(0, Math.min(100, initialCrop.x - percentX));
-      const newY = Math.max(0, Math.min(100, initialCrop.y - percentY));
+    const containerWidth = containerRef.current.offsetWidth || 1;
+    const containerHeight = containerRef.current.offsetHeight || 1;
 
-      onCropChange(Math.round(newX), Math.round(newY));
-    },
-    [isDragging, dragStart, initialCrop, onCropChange]
-  );
+    const percentX = (deltaX / containerWidth) * 100;
+    const percentY = (deltaY / containerHeight) * 100;
 
-  const handleMouseUp = useCallback(() => {
+    const newX = Math.max(0, Math.min(100, initialCrop.x - percentX));
+    const newY = Math.max(0, Math.min(100, initialCrop.y - percentY));
+
+    onCropChange(Math.round(newX), Math.round(newY));
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
     setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore if capture was not set
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  };
 
-  const handleReset = () => {
+  const handleCentralize = () => {
     onCropChange(50, 50);
+  };
+
+  const handleTriggerUpload = () => {
+    fileInputRef.current?.click();
   };
 
   return (
     <div className="space-y-3">
       <Label>{label}</Label>
 
+      <Input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        disabled={uploading}
+        onChange={() => handleUpload()}
+      />
+
       {!imageUrl ? (
         <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-          <Input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleUpload}
-            className="hidden"
-            id={`hero-upload-${aspectRatio}`}
-            disabled={uploading}
-          />
-          <label
-            htmlFor={`hero-upload-${aspectRatio}`}
-            className="cursor-pointer flex flex-col items-center gap-2"
+          <button
+            type="button"
+            onClick={handleTriggerUpload}
+            className="cursor-pointer flex flex-col items-center gap-2 w-full"
           >
             <Upload className="h-8 w-8 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
@@ -157,51 +156,40 @@ export function HeroCropEditor({
             <span className="text-xs text-muted-foreground">
               JPG, PNG ou WebP (máx. 5MB)
             </span>
-          </label>
+          </button>
         </div>
       ) : (
         <div className="space-y-3">
-          {/* Crop Editor */}
           <div
             ref={containerRef}
-            className="relative overflow-hidden rounded-lg border-2 border-primary cursor-move select-none"
+            className={`relative overflow-hidden rounded-lg border-2 border-primary ${previewAspectClass}`}
             style={{
-              width: previewWidth,
-              height: previewHeight,
-              maxWidth: "100%",
+              backgroundImage: imageUrl ? `url('${imageUrl}')` : undefined,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: `${cropX}% ${cropY}%`,
             }}
-            onMouseDown={handleMouseDown}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            onPointerLeave={handlePointerUp}
           >
-            {/* Background image */}
-            <div
-              className="absolute inset-0 bg-cover bg-no-repeat"
-              style={{
-                backgroundImage: `url('${imageUrl}')`,
-                backgroundPosition: `${cropX}% ${cropY}%`,
-              }}
-            />
-
-            {/* Grid overlay */}
             <div className="absolute inset-0 pointer-events-none">
-              {/* Vertical lines */}
               <div className="absolute left-1/3 top-0 bottom-0 w-px bg-white/40" />
               <div className="absolute left-2/3 top-0 bottom-0 w-px bg-white/40" />
-              {/* Horizontal lines */}
               <div className="absolute top-1/3 left-0 right-0 h-px bg-white/40" />
               <div className="absolute top-2/3 left-0 right-0 h-px bg-white/40" />
             </div>
 
-            {/* Center crosshair */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-8 h-8 border-2 border-white/60 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-white/60 rounded-full flex items-center justify-center bg-black/20">
                 <Move className="w-4 h-4 text-white/80" />
               </div>
             </div>
 
-            {/* Dark overlay for better visibility */}
-            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
-            {/* Drag indicator */}
             {isDragging && (
               <div className="absolute inset-0 bg-primary/10 pointer-events-none" />
             )}
@@ -212,17 +200,26 @@ export function HeroCropEditor({
             Arraste para ajustar o enquadramento
           </p>
 
-          {/* Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleReset}
+              onClick={handleCentralize}
               className="flex items-center gap-1"
             >
               <RotateCcw className="w-3 h-3" />
               Centralizar
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleTriggerUpload}
+              className="flex items-center gap-1"
+            >
+              <Upload className="w-3 h-3" />
+              Trocar
             </Button>
             <Button
               type="button"
@@ -236,7 +233,6 @@ export function HeroCropEditor({
             </Button>
           </div>
 
-          {/* Position indicator */}
           <p className="text-xs text-muted-foreground">
             Posição: {cropX}% x {cropY}%
           </p>
@@ -245,3 +241,4 @@ export function HeroCropEditor({
     </div>
   );
 }
+
