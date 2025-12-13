@@ -24,12 +24,6 @@ interface UpdateShopSettingsData {
   pix_message?: string | null;
   pix_note?: string | null;
   maps_link?: string | null;
-  hero_bg_desktop_url?: string | null;
-  hero_bg_mobile_url?: string | null;
-  hero_bg_desktop_crop_x?: number;
-  hero_bg_desktop_crop_y?: number;
-  hero_bg_mobile_crop_x?: number;
-  hero_bg_mobile_crop_y?: number;
   footer_text?: string | null;
 }
 

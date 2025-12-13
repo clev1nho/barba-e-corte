@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, MessageCircle, Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,14 +11,6 @@ interface HeroProps {
 
 export function Hero({ settings, isLoading }: HeroProps) {
   const [logoError, setLogoError] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
 
   // Show loading skeleton while data is loading
   if (isLoading) {
@@ -35,42 +27,18 @@ export function Hero({ settings, isLoading }: HeroProps) {
 
   const hasCustomLogo = settings?.logo_url && !logoError;
 
-  // Get background image and crop based on device
-  const bgImageUrl = isMobile 
-    ? settings?.hero_bg_mobile_url 
-    : settings?.hero_bg_desktop_url;
-  const cropX = isMobile 
-    ? (settings?.hero_bg_mobile_crop_x ?? 50) 
-    : (settings?.hero_bg_desktop_crop_x ?? 50);
-  const cropY = isMobile 
-    ? (settings?.hero_bg_mobile_crop_y ?? 50) 
-    : (settings?.hero_bg_desktop_crop_y ?? 50);
-
-  const hasBackgroundImage = bgImageUrl && bgImageUrl.trim().length > 0;
-
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
-      {/* Background image - only render if configured in admin */}
-      {hasBackgroundImage && (
-        <div 
-          className="absolute inset-0 bg-cover bg-no-repeat"
-          style={{ 
-            backgroundImage: `url('${bgImageUrl}')`,
-            backgroundPosition: `${cropX}% ${cropY}%`,
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-          }}
-        />
-      )}
-      
-      {/* Dark overlay for text legibility */}
+      {/* Background image - hardcoded */}
       <div 
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-cover bg-no-repeat bg-center"
         style={{ 
-          transform: "translateZ(0)",
-          backfaceVisibility: "hidden",
+          backgroundImage: `url('/images/hero-bg.jpg')`,
         }}
       />
+      
+      {/* Dark overlay for text legibility */}
+      <div className="absolute inset-0 bg-black/60" />
 
       <div className="relative z-10 text-center max-w-lg mx-auto">
         {/* Logo/Icon */}
