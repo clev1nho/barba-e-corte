@@ -316,10 +316,13 @@ const Agenda = () => {
                           <User className="w-4 h-4 text-muted-foreground" />
                           <span className="font-medium">{apt.client_name}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span>{apt.client_whatsapp}</span>
-                        </div>
+                        {/* Only show phone/WhatsApp for owner, hide for staff */}
+                        {isAdminOrOwner && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-muted-foreground" />
+                            <span>{apt.client_whatsapp}</span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <Scissors className="w-4 h-4 text-muted-foreground" />
                           <span>{apt.services?.name || "Serviço"}</span>

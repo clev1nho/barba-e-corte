@@ -5,6 +5,9 @@ import { useShopSettings } from "@/hooks/useShopSettings";
 export function Footer() {
   const { data: settings } = useShopSettings();
 
+  // Use footer_text from admin if available, otherwise don't show
+  const footerText = settings?.footer_text?.trim();
+
   return (
     <footer className="py-8 px-4 border-t border-border">
       <div className="max-w-lg mx-auto">
@@ -35,9 +38,11 @@ export function Footer() {
           </Link>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          © {new Date().getFullYear()} Barbearia Exclusiva. Todos os direitos reservados.
-        </p>
+        {footerText && footerText.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            {footerText}
+          </p>
+        )}
       </div>
     </footer>
   );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, MessageCircle, Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -10,24 +10,46 @@ interface HeroProps {
 
 export function Hero({ settings }: HeroProps) {
   const [logoError, setLogoError] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
+  // Detect mobile/desktop for responsive background
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const whatsappLink = settings?.whatsapp
     ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`
     : "#";
 
   const hasCustomLogo = settings?.logo_url && !logoError;
 
+  // Get background image and position based on device
+  const bgImageUrl = isMobile 
+    ? settings?.hero_bg_mobile_url 
+    : settings?.hero_bg_desktop_url;
+  const bgPosition = isMobile 
+    ? (settings?.hero_bg_mobile_position || 'center') 
+    : (settings?.hero_bg_desktop_position || 'center');
+
+  const hasBackgroundImage = bgImageUrl && bgImageUrl.trim().length > 0;
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-16 overflow-hidden">
-      {/* Background image with responsive positioning - GPU acceleration to prevent glitches */}
-      <div 
-        className="absolute inset-0 bg-cover bg-[position:85%_10%] md:bg-[position:75%_50%]"
-        style={{ 
-          backgroundImage: "url('/images/hero-bg.jpg')",
-          transform: "translateZ(0)",
-          backfaceVisibility: "hidden",
-        }}
-      />
+      {/* Background image - only render if configured in admin */}
+      {hasBackgroundImage && (
+        <div 
+          className="absolute inset-0 bg-cover bg-no-repeat"
+          style={{ 
+            backgroundImage: `url('${bgImageUrl}')`,
+            backgroundPosition: bgPosition,
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+          }}
+        />
+      )}
       
       {/* Dark overlay for text legibility - GPU acceleration */}
       <div 
