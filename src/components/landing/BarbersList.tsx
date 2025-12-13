@@ -49,16 +49,16 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
-              className="glass-card rounded-none md:rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 md:hover:scale-[1.02] hover:shadow-lg flex flex-col h-[420px] md:h-[360px]"
+              className="glass-card rounded-none md:rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 md:hover:scale-[1.02] hover:shadow-lg flex flex-col min-h-[60vh] md:min-h-0 md:h-[360px]"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Image area - fills available space */}
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 w-full bg-background">
                 {barber.photo_url ? (
                   <img
                     src={barber.photo_url}
                     alt={barber.name}
-                    className="w-full h-full object-cover object-top md:object-contain md:object-center"
+                    className="w-full h-full object-contain md:object-contain md:object-center"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-gold flex items-center justify-center">
@@ -69,7 +69,7 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
                 )}
               </div>
               {/* Name bar - fixed height at bottom */}
-              <div className="h-16 flex items-center justify-center px-4 shrink-0">
+              <div className="h-16 flex items-center justify-center px-4 shrink-0 bg-background">
                 <h3 className="font-semibold text-lg text-center">{barber.name}</h3>
               </div>
             </div>
