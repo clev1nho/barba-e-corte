@@ -38,30 +38,30 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
   if (!barbers?.length) return null;
 
   return (
-    <section className="py-16 px-0 md:px-4">
-      <div className="w-full max-w-none md:max-w-4xl mx-auto px-0 md:px-0">
-        <h2 className="text-2xl font-bold mb-2 text-center px-4 md:px-0">Nossos Barbeiros</h2>
-        <p className="text-muted-foreground text-center mb-8 px-4 md:px-0">
+    <section className="py-16 px-4">
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-2xl font-bold mb-2 text-center">Nossos Barbeiros</h2>
+        <p className="text-muted-foreground text-center mb-8">
           Profissionais experientes e dedicados
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {barbers.map((barber, index) => (
             <div
               key={barber.id}
-              className="glass-card rounded-none md:rounded-xl overflow-hidden animate-fade-in transition-transform duration-300 md:hover:scale-[1.02] hover:shadow-lg flex flex-col min-h-[60vh] md:min-h-0 md:h-[360px]"
+              className="bg-charcoal-800 border border-gold/40 rounded-2xl overflow-hidden shadow-lg animate-fade-in transition-all duration-300 hover:scale-[1.02] hover:border-gold/70 hover:shadow-xl flex flex-col"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Image area - fills available space */}
-              <div className="flex-1 w-full bg-background">
+              {/* Image area */}
+              <div className="w-full aspect-[3/4] bg-charcoal-800 flex items-center justify-center p-4">
                 {barber.photo_url ? (
                   <img
                     src={barber.photo_url}
                     alt={barber.name}
-                    className="w-full h-full object-contain md:object-contain md:object-center"
+                    className="w-full h-full object-contain"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-gold flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-gold rounded-xl flex items-center justify-center">
                     <span className="text-4xl md:text-5xl font-bold text-primary-foreground">
                       {getInitials(barber.name)}
                     </span>
@@ -69,8 +69,8 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
                 )}
               </div>
               {/* Name bar - fixed height at bottom */}
-              <div className="h-16 flex items-center justify-center px-4 shrink-0 bg-background">
-                <h3 className="font-semibold text-lg text-center">{barber.name}</h3>
+              <div className="h-16 flex items-center justify-center px-4 shrink-0 bg-charcoal-900 border-t border-gold/20">
+                <h3 className="font-semibold text-lg text-center text-foreground">{barber.name}</h3>
               </div>
             </div>
           ))}
