@@ -6,7 +6,9 @@ interface CreateServiceData {
   description?: string;
   duration_minutes: number;
   price: number;
+  deposit_amount?: number;
   active: boolean;
+  category_id?: string | null;
 }
 
 interface UpdateServiceData extends CreateServiceData {
@@ -23,6 +25,7 @@ export function useCreateService() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services_with_categories"] });
     },
   });
 }
@@ -37,6 +40,7 @@ export function useUpdateService() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services_with_categories"] });
     },
   });
 }
@@ -51,6 +55,7 @@ export function useDeleteService() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
+      queryClient.invalidateQueries({ queryKey: ["services_with_categories"] });
     },
   });
 }

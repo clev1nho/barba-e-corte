@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 interface StepServiceMultiProps {
   selectedServices: ServiceWithCategory[];
   onSelect: (services: ServiceWithCategory[]) => void;
+  onContinue: () => void;
   barberId?: string;
 }
 
-export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepServiceMultiProps) {
+export function StepServiceMulti({ selectedServices, onSelect, onContinue, barberId }: StepServiceMultiProps) {
   const { data: services, isLoading } = useServicesWithCategories();
   const { data: barberServiceIds } = useServiceIdsForBarber(barberId);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -40,7 +41,7 @@ export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepS
 
   const totalDuration = selectedServices.reduce((sum, s) => sum + s.duration_minutes, 0);
   const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
-  const totalDeposit = selectedServices.reduce((sum, s) => sum + ((s as any).deposit_amount || 0), 0);
+  const totalDeposit = selectedServices.reduce((sum, s) => sum + (s.deposit_amount || 0), 0);
 
   if (isLoading) {
     return (
@@ -58,7 +59,6 @@ export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepS
   }
 
   const grouped = groupServicesByCategory(availableServices);
-  const categoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
   return (
     <div className="space-y-4">
@@ -105,23 +105,20 @@ export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepS
         </div>
       )}
 
-      {categoryNames.map((categoryName) => {
-        const group = grouped[categoryName];
-        if (!group) return null;
-        
-        const isExpanded = expandedCategories[categoryName] ?? false;
-        const hasSubcategories = group.subcategories && Object.keys(group.subcategories).length > 0;
-        const categorySelectedCount = [...group.services, ...Object.values(group.subcategories || {}).flat()]
-          .filter(s => selectedServices.some(sel => sel.id === s.id)).length;
+      {grouped.map((group) => {
+        const isExpanded = expandedCategories[group.categoryName] ?? false;
+        const hasSubcategories = Object.keys(group.subcategories).length > 0;
+        const allCategoryServices = [...group.services, ...Object.values(group.subcategories).flat()];
+        const categorySelectedCount = allCategoryServices.filter(s => selectedServices.some(sel => sel.id === s.id)).length;
 
         return (
-          <div key={categoryName} className="glass-card rounded-xl overflow-hidden">
+          <div key={group.categoryName} className="glass-card rounded-xl overflow-hidden">
             <button
-              onClick={() => toggleCategory(categoryName)}
+              onClick={() => toggleCategory(group.categoryName)}
               className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{categoryName}</span>
+                <span className="font-semibold">{group.categoryName}</span>
                 {categorySelectedCount > 0 && (
                   <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
                     {categorySelectedCount}
@@ -142,7 +139,7 @@ export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepS
                   />
                 ))}
 
-                {hasSubcategories && Object.entries(group.subcategories!).map(([subcat, services]) => (
+                {hasSubcategories && Object.entries(group.subcategories).map(([subcat, services]) => (
                   <div key={subcat}>
                     <div className="px-4 py-2 bg-muted/30 text-sm font-medium text-muted-foreground">
                       {subcat}
@@ -163,15 +160,17 @@ export function StepServiceMulti({ selectedServices, onSelect, barberId }: StepS
         );
       })}
 
-      {selectedServices.length > 0 && (
-        <Button 
-          onClick={() => onSelect(selectedServices)} 
-          size="lg" 
-          className="w-full mt-4"
-        >
-          Continuar com {selectedServices.length} serviço(s)
-        </Button>
-      )}
+      {/* Continue Button - Always visible, disabled if no service selected */}
+      <Button 
+        onClick={onContinue}
+        disabled={selectedServices.length === 0}
+        size="lg" 
+        className="w-full mt-4"
+      >
+        {selectedServices.length === 0 
+          ? "Selecione pelo menos 1 serviço" 
+          : `Continuar com ${selectedServices.length} serviço(s)`}
+      </Button>
     </div>
   );
 }
@@ -200,9 +199,9 @@ function ServiceItemMulti({
             <span className="text-primary font-semibold">
               R$ {service.price.toFixed(2).replace(".", ",")}
             </span>
-            {(service as any).deposit_amount > 0 && (
+            {(service.deposit_amount ?? 0) > 0 && (
               <span className="text-xs text-muted-foreground">
-                Sinal: R$ {((service as any).deposit_amount).toFixed(2).replace(".", ",")}
+                Sinal: R$ {(service.deposit_amount ?? 0).toFixed(2).replace(".", ",")}
               </span>
             )}
           </div>

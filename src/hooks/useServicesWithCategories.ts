@@ -7,10 +7,12 @@ export interface ServiceWithCategory {
   description: string | null;
   duration_minutes: number;
   price: number;
+  deposit_amount: number | null;
   active: boolean | null;
   category_id: string | null;
   subcategory: string | null;
   category_name?: string;
+  category_order?: number | null;
 }
 
 export function useServicesWithCategories(activeOnly = true) {
@@ -22,7 +24,8 @@ export function useServicesWithCategories(activeOnly = true) {
         .select(`
           *,
           service_categories (
-            name
+            name,
+            display_order
           )
         `);
       
@@ -37,33 +40,50 @@ export function useServicesWithCategories(activeOnly = true) {
       return data.map((service: any) => ({
         ...service,
         category_name: service.service_categories?.name || null,
+        category_order: service.service_categories?.display_order ?? 999,
       })) as ServiceWithCategory[];
     },
   });
 }
 
-export function groupServicesByCategory(services: ServiceWithCategory[]) {
-  const groups: Record<string, { 
-    services: ServiceWithCategory[]; 
-    subcategories?: Record<string, ServiceWithCategory[]> 
-  }> = {};
+export interface GroupedServices {
+  categoryName: string;
+  categoryOrder: number;
+  services: ServiceWithCategory[];
+  subcategories: Record<string, ServiceWithCategory[]>;
+}
+
+export function groupServicesByCategory(services: ServiceWithCategory[]): GroupedServices[] {
+  const groupsMap: Record<string, GroupedServices> = {};
   
   services.forEach((service) => {
     const categoryName = service.category_name || "Outros";
+    const categoryOrder = service.category_order ?? 999;
     
-    if (!groups[categoryName]) {
-      groups[categoryName] = { services: [], subcategories: {} };
+    if (!groupsMap[categoryName]) {
+      groupsMap[categoryName] = { 
+        categoryName, 
+        categoryOrder, 
+        services: [], 
+        subcategories: {} 
+      };
     }
     
     if (service.subcategory) {
-      if (!groups[categoryName].subcategories![service.subcategory]) {
-        groups[categoryName].subcategories![service.subcategory] = [];
+      if (!groupsMap[categoryName].subcategories[service.subcategory]) {
+        groupsMap[categoryName].subcategories[service.subcategory] = [];
       }
-      groups[categoryName].subcategories![service.subcategory].push(service);
+      groupsMap[categoryName].subcategories[service.subcategory].push(service);
     } else {
-      groups[categoryName].services.push(service);
+      groupsMap[categoryName].services.push(service);
     }
   });
   
-  return groups;
+  // Sort by category order, then by name
+  return Object.values(groupsMap).sort((a, b) => {
+    if (a.categoryOrder !== b.categoryOrder) {
+      return a.categoryOrder - b.categoryOrder;
+    }
+    return a.categoryName.localeCompare(b.categoryName, 'pt-BR');
+  });
 }
