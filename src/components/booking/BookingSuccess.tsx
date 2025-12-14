@@ -5,6 +5,8 @@ import { CheckCircle, MessageCircle, Home, Calendar, AlertCircle } from "lucide-
 import { ShopSettings } from "@/hooks/useShopSettings";
 import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
 import { Barber } from "@/hooks/useBarbers";
+import { normalizeWhatsAppNumber, buildWhatsAppUrl, openWhatsApp } from "@/lib/whatsapp";
+import { toast } from "sonner";
 
 interface LegacyBookingData {
   service: ServiceWithCategory | null;
@@ -26,29 +28,7 @@ interface BookingSuccessProps {
   totalDuration?: number;
 }
 
-function cleanWhatsAppNumber(phone: string | null | undefined): string {
-  if (!phone) return "";
-  // Remove all non-digits
-  let cleaned = phone.replace(/\D/g, "");
-  // If it's a Brazilian number without country code, add 55
-  if (cleaned.length === 10 || cleaned.length === 11) {
-    cleaned = "55" + cleaned;
-  }
-  // Validate minimum length for international number
-  if (cleaned.length < 10) return "";
-  return cleaned;
-}
-
-function openWhatsAppLink(url: string): void {
-  // Try window.open first
-  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
-  // If blocked by popup blocker, fallback to location change
-  if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-    window.location.href = url;
-  }
-}
-
-export function BookingSuccess({ 
+export function BookingSuccess({
   bookingData, 
   settings, 
   appointmentId,
@@ -78,35 +58,50 @@ export function BookingSuccess({
       })
     : "";
 
-  const whatsappNumber = cleanWhatsAppNumber(settings?.whatsapp);
-  const hasWhatsApp = whatsappNumber.length > 0;
+  // Normalize phone number using the helper
+  const normalizedPhone = normalizeWhatsAppNumber(settings?.whatsapp);
+  const hasWhatsApp = normalizedPhone !== null;
 
   const servicesText = services.map(s => s.name).join(", ");
   
-  const whatsappMessage = encodeURIComponent(
+  // Build message (NOT encoded yet - the helper will encode it)
+  const whatsappMessage = 
     `👤 Nome: ${bookingData.clientName}\n` +
     `✂️ Serviço${services.length > 1 ? 's' : ''}: ${servicesText}\n` +
     `💈 Barbeiro: ${bookingData.barber?.name}\n` +
     `📅 Data: ${shortDate}\n` +
     `⏰ Horário: ${bookingData.time}\n\n` +
     `Para confirmar, envie aqui no WhatsApp a foto do comprovante do sinal.\n` +
-    `O valor do sinal será abatido do valor total.`
-  );
+    `O valor do sinal será abatido do valor total.`;
 
-  const whatsappLink = hasWhatsApp ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}` : "";
+  const handleOpenWhatsApp = () => {
+    if (!settings?.whatsapp || !settings.whatsapp.trim()) {
+      toast.error("WhatsApp não configurado no painel admin.");
+      return;
+    }
+    
+    if (!normalizedPhone) {
+      toast.error("Número do WhatsApp inválido. Use DDI+DDD+número.");
+      return;
+    }
+    
+    const url = buildWhatsAppUrl(normalizedPhone, whatsappMessage);
+    openWhatsApp(url);
+  };
 
   useEffect(() => {
-    if (!hasRedirected.current && hasWhatsApp) {
+    if (!hasRedirected.current && hasWhatsApp && normalizedPhone) {
       hasRedirected.current = true;
       
       const timer = setTimeout(() => {
         onWhatsAppRedirected?.();
-        openWhatsAppLink(whatsappLink);
+        const url = buildWhatsAppUrl(normalizedPhone, whatsappMessage);
+        openWhatsApp(url);
       }, 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [whatsappLink, hasWhatsApp, onWhatsAppRedirected]);
+  }, [normalizedPhone, hasWhatsApp, whatsappMessage, onWhatsAppRedirected]);
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -190,7 +185,7 @@ export function BookingSuccess({
               variant="default" 
               size="lg" 
               className="w-full"
-              onClick={() => openWhatsAppLink(whatsappLink)}
+              onClick={handleOpenWhatsApp}
             >
               <MessageCircle className="w-5 h-5" />
               Confirmar no WhatsApp
