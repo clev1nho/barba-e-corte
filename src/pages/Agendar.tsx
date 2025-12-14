@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StepService } from "@/components/booking/StepService";
+import { StepServiceMulti } from "@/components/booking/StepServiceMulti";
 import { StepBarber } from "@/components/booking/StepBarber";
 import { StepDate } from "@/components/booking/StepDate";
 import { StepTime } from "@/components/booking/StepTime";
-import { StepClientInfo } from "@/components/booking/StepClientInfo";
+import { StepClientInfoExpanded } from "@/components/booking/StepClientInfoExpanded";
 import { StepConfirm } from "@/components/booking/StepConfirm";
 import { BookingSuccess } from "@/components/booking/BookingSuccess";
 import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
@@ -16,23 +16,36 @@ import { useCreateAppointment } from "@/hooks/useAppointments";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BookingData {
-  service: ServiceWithCategory | null;
+  services: ServiceWithCategory[];
   barber: Barber | null;
   anyBarber: boolean;
   date: string;
   time: string;
   clientName: string;
   clientWhatsapp: string;
+  clientEmail: string;
+  clientBirthDate: string;
+  referralSource: string;
+  // Computed values
+  totalDuration: number;
+  totalPrice: number;
+  totalDeposit: number;
 }
 
 const initialData: BookingData = {
-  service: null,
+  services: [],
   barber: null,
   anyBarber: false,
   date: "",
   time: "",
   clientName: "",
   clientWhatsapp: "",
+  clientEmail: "",
+  clientBirthDate: "",
+  referralSource: "",
+  totalDuration: 0,
+  totalPrice: 0,
+  totalDeposit: 0,
 };
 
 const Agendar = () => {
@@ -41,7 +54,6 @@ const Agendar = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
 
-  // Services are now loaded inside StepService component
   const { data: barbers, isLoading: loadingBarbers } = useBarbers();
   const { data: settings } = useShopSettings();
   const createAppointment = useCreateAppointment();
@@ -56,20 +68,25 @@ const Agendar = () => {
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   const handleConfirm = async () => {
-    if (!bookingData.service || !bookingData.barber) return;
+    if (bookingData.services.length === 0 || !bookingData.barber) return;
 
     try {
       const result = await createAppointment.mutateAsync({
-        service_id: bookingData.service.id,
+        service_id: bookingData.services[0].id, // Primary service for compatibility
+        service_ids: bookingData.services.map(s => s.id),
         barber_id: bookingData.barber.id,
         date: bookingData.date,
         time: bookingData.time,
-        duration_minutes: bookingData.service.duration_minutes,
+        duration_minutes: bookingData.totalDuration,
         client_name: bookingData.clientName,
         client_whatsapp: bookingData.clientWhatsapp,
+        client_email: bookingData.clientEmail,
+        client_birth_date: bookingData.clientBirthDate,
+        referral_source: bookingData.referralSource,
+        total_price: bookingData.totalPrice,
+        total_deposit: bookingData.totalDeposit,
       });
       
-      // Store the appointment ID for display and tracking
       if (result?.appointmentId) {
         setAppointmentId(result.appointmentId);
       }
@@ -80,11 +97,9 @@ const Agendar = () => {
     }
   };
 
-  // Track when WhatsApp redirect happens
   const handleWhatsAppRedirected = async () => {
     if (appointmentId) {
       try {
-        // Update the appointment to track WhatsApp redirect
         await supabase
           .from("appointments")
           .update({ whatsapp_redirected_at: new Date().toISOString() })
@@ -95,13 +110,28 @@ const Agendar = () => {
     }
   };
 
+  // Build a compatible object for BookingSuccess
+  const legacyBookingData = {
+    service: bookingData.services[0] || null,
+    barber: bookingData.barber,
+    anyBarber: bookingData.anyBarber,
+    date: bookingData.date,
+    time: bookingData.time,
+    clientName: bookingData.clientName,
+    clientWhatsapp: bookingData.clientWhatsapp,
+  };
+
   if (isSuccess) {
     return (
       <BookingSuccess
-        bookingData={bookingData}
+        bookingData={legacyBookingData}
         settings={settings ?? null}
         appointmentId={appointmentId ?? undefined}
         onWhatsAppRedirected={handleWhatsAppRedirected}
+        // Pass additional info for multi-service display
+        allServices={bookingData.services}
+        totalPrice={bookingData.totalPrice}
+        totalDuration={bookingData.totalDuration}
       />
     );
   }
@@ -142,23 +172,27 @@ const Agendar = () => {
       {/* Content */}
       <div className="max-w-lg mx-auto px-4 py-6">
         {step === 1 && (
-          <StepService
-            selected={bookingData.service}
-            onSelect={(service) => {
-              updateData({ service });
-              nextStep();
-            }}
-          />
-        )}
-
-        {step === 2 && (
           <StepBarber
             barbers={barbers ?? []}
             isLoading={loadingBarbers}
             selected={bookingData.barber}
             anyBarber={bookingData.anyBarber}
             onSelect={(barber, anyBarber) => {
-              updateData({ barber, anyBarber });
+              updateData({ barber, anyBarber, services: [] }); // Reset services when barber changes
+              nextStep();
+            }}
+          />
+        )}
+
+        {step === 2 && (
+          <StepServiceMulti
+            selectedServices={bookingData.services}
+            barberId={bookingData.barber?.id}
+            onSelect={(services) => {
+              const totalDuration = services.reduce((sum, s) => sum + s.duration_minutes, 0);
+              const totalPrice = services.reduce((sum, s) => sum + s.price, 0);
+              const totalDeposit = services.reduce((sum, s) => sum + ((s as any).deposit_amount || 0), 0);
+              updateData({ services, totalDuration, totalPrice, totalDeposit });
               nextStep();
             }}
           />
@@ -185,7 +219,8 @@ const Agendar = () => {
             selectedBarber={bookingData.barber}
             anyBarber={bookingData.anyBarber}
             selectedDate={bookingData.date}
-            service={bookingData.service}
+            service={bookingData.services[0] || null}
+            serviceDuration={bookingData.totalDuration}
             selected={bookingData.time}
             onSelect={(time, barber) => {
               updateData({ time, barber: barber || bookingData.barber });
@@ -195,11 +230,20 @@ const Agendar = () => {
         )}
 
         {step === 5 && (
-          <StepClientInfo
+          <StepClientInfoExpanded
             clientName={bookingData.clientName}
             clientWhatsapp={bookingData.clientWhatsapp}
-            onSubmit={(clientName, clientWhatsapp) => {
-              updateData({ clientName, clientWhatsapp });
+            clientEmail={bookingData.clientEmail}
+            clientBirthDate={bookingData.clientBirthDate}
+            referralSource={bookingData.referralSource}
+            onSubmit={(data) => {
+              updateData({
+                clientName: data.name,
+                clientWhatsapp: data.whatsapp,
+                clientEmail: data.email,
+                clientBirthDate: data.birthDate,
+                referralSource: data.referralSource,
+              });
               nextStep();
             }}
           />
@@ -207,7 +251,11 @@ const Agendar = () => {
 
         {step === 6 && (
           <StepConfirm
-            bookingData={bookingData}
+            bookingData={legacyBookingData}
+            allServices={bookingData.services}
+            totalPrice={bookingData.totalPrice}
+            totalDuration={bookingData.totalDuration}
+            totalDeposit={bookingData.totalDeposit}
             onConfirm={handleConfirm}
             isLoading={createAppointment.isPending}
           />

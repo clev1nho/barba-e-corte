@@ -17,6 +17,8 @@ export type Database = {
       appointments: {
         Row: {
           barber_id: string | null
+          client_birth_date: string | null
+          client_email: string | null
           client_name: string
           client_whatsapp: string
           created_at: string | null
@@ -24,14 +26,20 @@ export type Database = {
           duration_minutes: number
           id: string
           notes: string | null
+          referral_source: string | null
           service_id: string | null
+          service_ids: string[] | null
           status: Database["public"]["Enums"]["appointment_status"] | null
           time: string
+          total_deposit: number | null
+          total_price: number | null
           updated_at: string | null
           whatsapp_redirected_at: string | null
         }
         Insert: {
           barber_id?: string | null
+          client_birth_date?: string | null
+          client_email?: string | null
           client_name: string
           client_whatsapp: string
           created_at?: string | null
@@ -39,14 +47,20 @@ export type Database = {
           duration_minutes: number
           id?: string
           notes?: string | null
+          referral_source?: string | null
           service_id?: string | null
+          service_ids?: string[] | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time: string
+          total_deposit?: number | null
+          total_price?: number | null
           updated_at?: string | null
           whatsapp_redirected_at?: string | null
         }
         Update: {
           barber_id?: string | null
+          client_birth_date?: string | null
+          client_email?: string | null
           client_name?: string
           client_whatsapp?: string
           created_at?: string | null
@@ -54,9 +68,13 @@ export type Database = {
           duration_minutes?: number
           id?: string
           notes?: string | null
+          referral_source?: string | null
           service_id?: string | null
+          service_ids?: string[] | null
           status?: Database["public"]["Enums"]["appointment_status"] | null
           time?: string
+          total_deposit?: number | null
+          total_price?: number | null
           updated_at?: string | null
           whatsapp_redirected_at?: string | null
         }
@@ -70,6 +88,42 @@ export type Database = {
           },
           {
             foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      barber_services: {
+        Row: {
+          barber_id: string
+          created_at: string | null
+          id: string
+          service_id: string
+        }
+        Insert: {
+          barber_id: string
+          created_at?: string | null
+          id?: string
+          service_id: string
+        }
+        Update: {
+          barber_id?: string
+          created_at?: string | null
+          id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_services_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_services_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
