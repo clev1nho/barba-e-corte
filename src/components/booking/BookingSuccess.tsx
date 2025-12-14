@@ -28,11 +28,24 @@ interface BookingSuccessProps {
 
 function cleanWhatsAppNumber(phone: string | null | undefined): string {
   if (!phone) return "";
+  // Remove all non-digits
   let cleaned = phone.replace(/\D/g, "");
+  // If it's a Brazilian number without country code, add 55
   if (cleaned.length === 10 || cleaned.length === 11) {
     cleaned = "55" + cleaned;
   }
+  // Validate minimum length for international number
+  if (cleaned.length < 10) return "";
   return cleaned;
+}
+
+function openWhatsAppLink(url: string): void {
+  // Try window.open first
+  const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+  // If blocked by popup blocker, fallback to location change
+  if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+    window.location.href = url;
+  }
 }
 
 export function BookingSuccess({ 
@@ -88,12 +101,12 @@ export function BookingSuccess({
       
       const timer = setTimeout(() => {
         onWhatsAppRedirected?.();
-        window.open(whatsappLink, "_blank");
+        openWhatsAppLink(whatsappLink);
       }, 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [whatsappLink, onWhatsAppRedirected]);
+  }, [whatsappLink, hasWhatsApp, onWhatsAppRedirected]);
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -173,12 +186,15 @@ export function BookingSuccess({
 
         <div className="space-y-3 animate-slide-up" style={{ animationDelay: "0.4s" }}>
           {hasWhatsApp ? (
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="block">
-              <Button variant="default" size="lg" className="w-full">
-                <MessageCircle className="w-5 h-5" />
-                Confirmar no WhatsApp
-              </Button>
-            </a>
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="w-full"
+              onClick={() => openWhatsAppLink(whatsappLink)}
+            >
+              <MessageCircle className="w-5 h-5" />
+              Confirmar no WhatsApp
+            </Button>
           ) : (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
