@@ -191,10 +191,10 @@ const Agendar = () => {
             onSelect={(services) => {
               const totalDuration = services.reduce((sum, s) => sum + s.duration_minutes, 0);
               const totalPrice = services.reduce((sum, s) => sum + s.price, 0);
-              const totalDeposit = services.reduce((sum, s) => sum + ((s as any).deposit_amount || 0), 0);
+              const totalDeposit = services.reduce((sum, s) => sum + (s.deposit_amount || 0), 0);
               updateData({ services, totalDuration, totalPrice, totalDeposit });
-              nextStep();
             }}
+            onContinue={nextStep}
           />
         )}
 

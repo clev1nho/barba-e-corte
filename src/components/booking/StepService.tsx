@@ -33,32 +33,22 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
   }
 
   const grouped = groupServicesByCategory(services || []);
-  
-  // Get all category names dynamically from the grouped data, sorted alphabetically
-  const categoryNames = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  
-  // Log for debugging
-  console.log("[StepService] Categories loaded:", categoryNames.length, categoryNames);
-  console.log("[StepService] Services loaded:", services?.length || 0);
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold mb-6">Escolha o serviço</h2>
 
-      {categoryNames.map((categoryName) => {
-        const group = grouped[categoryName];
-        if (!group) return null;
-        
-        const isExpanded = expandedCategories[categoryName] ?? false;
-        const hasSubcategories = group.subcategories && Object.keys(group.subcategories).length > 0;
+      {grouped.map((group) => {
+        const isExpanded = expandedCategories[group.categoryName] ?? false;
+        const hasSubcategories = Object.keys(group.subcategories).length > 0;
 
         return (
-          <div key={categoryName} className="glass-card rounded-xl overflow-hidden">
+          <div key={group.categoryName} className="glass-card rounded-xl overflow-hidden">
             <button
-              onClick={() => toggleCategory(categoryName)}
+              onClick={() => toggleCategory(group.categoryName)}
               className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
-              <span className="font-semibold">{categoryName}</span>
+              <span className="font-semibold">{group.categoryName}</span>
               {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
             </button>
 
@@ -74,8 +64,8 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
                   />
                 ))}
 
-                {/* Subcategories (for Massagens) */}
-                {hasSubcategories && Object.entries(group.subcategories!).map(([subcat, services]) => (
+                {/* Subcategories */}
+                {hasSubcategories && Object.entries(group.subcategories).map(([subcat, services]) => (
                   <div key={subcat}>
                     <div className="px-4 py-2 bg-muted/30 text-sm font-medium text-muted-foreground">
                       {subcat}
