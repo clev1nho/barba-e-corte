@@ -1,11 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, MessageCircle, Home, Calendar, AlertCircle } from "lucide-react";
 import { ShopSettings } from "@/hooks/useShopSettings";
 import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
 import { Barber } from "@/hooks/useBarbers";
-import { normalizeWhatsAppNumber, buildWhatsAppUrl, openWhatsApp } from "@/lib/whatsapp";
+import { normalizeWhatsAppNumber, buildWhatsAppUrl, isMobileDevice } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 interface LegacyBookingData {
@@ -37,7 +37,7 @@ export function BookingSuccess({
   totalPrice: propTotalPrice,
   totalDuration: propTotalDuration
 }: BookingSuccessProps) {
-  const hasRedirected = useRef(false);
+  const [popupBlockedUrl, setPopupBlockedUrl] = useState<string | null>(null);
 
   const services = allServices && allServices.length > 0 ? allServices : (bookingData.service ? [bookingData.service] : []);
   const displayPrice = propTotalPrice ?? services.reduce((sum, s) => sum + s.price, 0);
@@ -60,7 +60,7 @@ export function BookingSuccess({
 
   // Normalize phone number using the helper
   const normalizedPhone = normalizeWhatsAppNumber(settings?.whatsapp);
-  const hasWhatsApp = normalizedPhone !== null;
+  const hasWhatsApp = !!settings?.whatsapp?.trim();
 
   const servicesText = services.map(s => s.name).join(", ");
   
@@ -75,8 +75,10 @@ export function BookingSuccess({
     `O valor do sinal será abatido do valor total.`;
 
   const handleOpenWhatsApp = () => {
+    setPopupBlockedUrl(null);
+
     if (!settings?.whatsapp || !settings.whatsapp.trim()) {
-      toast.error("WhatsApp não configurado no painel admin.");
+      toast.error("WhatsApp da barbearia não configurado no painel.");
       return;
     }
     
@@ -86,22 +88,29 @@ export function BookingSuccess({
     }
     
     const url = buildWhatsAppUrl(normalizedPhone, whatsappMessage);
-    openWhatsApp(url);
-  };
+    const isMobile = isMobileDevice();
 
-  useEffect(() => {
-    if (!hasRedirected.current && hasWhatsApp && normalizedPhone) {
-      hasRedirected.current = true;
-      
-      const timer = setTimeout(() => {
+    if (isMobile) {
+      try {
+        window.location.href = url;
         onWhatsAppRedirected?.();
-        const url = buildWhatsAppUrl(normalizedPhone, whatsappMessage);
-        openWhatsApp(url);
-      }, 1500);
-
-      return () => clearTimeout(timer);
+      } catch (error) {
+        console.error("Erro ao abrir WhatsApp no mobile:", error);
+        toast.error("Não foi possível abrir o WhatsApp. Tente novamente.");
+      }
+      return;
     }
-  }, [normalizedPhone, hasWhatsApp, whatsappMessage, onWhatsAppRedirected]);
+
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+      setPopupBlockedUrl(url);
+      toast.error("Seu navegador bloqueou a abertura do WhatsApp. Use o botão abaixo para abrir manualmente.");
+      return;
+    }
+
+    onWhatsAppRedirected?.();
+  };
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -119,7 +128,7 @@ export function BookingSuccess({
           Seu horário está confirmado
         </p>
         <p className="text-sm text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "0.25s" }}>
-          Abrindo WhatsApp para confirmação...
+          Use o botão abaixo para confirmar no WhatsApp.
         </p>
 
         <div className="glass-card rounded-2xl p-5 mb-8 text-left animate-slide-up" style={{ animationDelay: "0.3s" }}>
@@ -193,7 +202,21 @@ export function BookingSuccess({
           ) : (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>WhatsApp não configurado no admin.</span>
+              <span>WhatsApp da barbearia não configurado no painel.</span>
+            </div>
+          )}
+
+          {popupBlockedUrl && (
+            <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted text-sm text-muted-foreground border border-border">
+              <p>Seu navegador bloqueou a abertura automática do WhatsApp.</p>
+              <a
+                href={popupBlockedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Abrir WhatsApp Web
+              </a>
             </div>
           )}
 
