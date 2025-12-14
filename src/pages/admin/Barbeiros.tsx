@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useBarbers, Barber } from "@/hooks/useBarbers";
 import { useCreateBarber, useUpdateBarber, useDeleteBarber } from "@/hooks/useBarberMutations";
-import { Plus, Pencil, Trash2, Users, Clock, Calendar } from "lucide-react";
+import { useBarberServices, useUpdateBarberServices } from "@/hooks/useBarberServices";
+import { Plus, Pencil, Trash2, Users, Clock, Calendar, Scissors } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BarberPhotoUpload } from "@/components/admin/BarberPhotoUpload";
+import { BarberServicesSelect } from "@/components/admin/BarberServicesSelect";
 import {
   Dialog,
   DialogContent,
@@ -49,6 +51,7 @@ interface BarberFormData {
   end_time: string;
   days_of_week: string[];
   active: boolean;
+  service_ids: string[];
 }
 
 const emptyForm: BarberFormData = {
@@ -59,6 +62,7 @@ const emptyForm: BarberFormData = {
   end_time: "19:00",
   days_of_week: ["segunda", "terça", "quarta", "quinta", "sexta", "sábado"],
   active: true,
+  service_ids: [],
 };
 
 const Barbeiros = () => {
@@ -66,10 +70,23 @@ const Barbeiros = () => {
   const createBarber = useCreateBarber();
   const updateBarber = useUpdateBarber();
   const deleteBarber = useDeleteBarber();
+  const updateBarberServices = useUpdateBarberServices();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBarber, setEditingBarber] = useState<Barber | null>(null);
   const [formData, setFormData] = useState<BarberFormData>(emptyForm);
+
+  // Load barber services when editing
+  const { data: barberServices } = useBarberServices(editingBarber?.id);
+
+  useEffect(() => {
+    if (editingBarber && barberServices) {
+      setFormData(prev => ({
+        ...prev,
+        service_ids: barberServices.map(bs => bs.service_id),
+      }));
+    }
+  }, [barberServices, editingBarber]);
 
   const openCreateDialog = () => {
     setEditingBarber(null);
@@ -87,6 +104,7 @@ const Barbeiros = () => {
       end_time: barber.end_time || "19:00",
       days_of_week: barber.days_of_week || [],
       active: barber.active ?? true,
+      service_ids: [], // Will be loaded by useEffect
     });
     setIsDialogOpen(true);
   };
@@ -107,10 +125,16 @@ const Barbeiros = () => {
     }
 
     if (editingBarber) {
+      const { service_ids, ...barberData } = formData;
       updateBarber.mutate(
-        { id: editingBarber.id, ...formData },
+        { id: editingBarber.id, ...barberData },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            // Update barber services
+            await updateBarberServices.mutateAsync({
+              barberId: editingBarber.id,
+              serviceIds: service_ids,
+            });
             toast({ title: "Barbeiro atualizado com sucesso" });
             setIsDialogOpen(false);
           },
@@ -120,8 +144,16 @@ const Barbeiros = () => {
         }
       );
     } else {
-      createBarber.mutate(formData, {
-        onSuccess: () => {
+      const { service_ids, ...barberData } = formData;
+      createBarber.mutate(barberData, {
+        onSuccess: async (data: any) => {
+          // If we have service_ids, update them after creation
+          if (service_ids.length > 0 && data?.id) {
+            await updateBarberServices.mutateAsync({
+              barberId: data.id,
+              serviceIds: service_ids,
+            });
+          }
           toast({ title: "Barbeiro criado com sucesso" });
           setIsDialogOpen(false);
         },
@@ -247,6 +279,13 @@ const Barbeiros = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Services Selection */}
+                <BarberServicesSelect
+                  selectedServiceIds={formData.service_ids}
+                  onChange={(ids) => setFormData({ ...formData, service_ids: ids })}
+                  disabled={createBarber.isPending || updateBarber.isPending}
+                />
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="active">Ativo</Label>

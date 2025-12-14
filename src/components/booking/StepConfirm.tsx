@@ -2,22 +2,50 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, Clock, Scissors, User, DollarSign, Loader2, Copy, Check, QrCode, AlertCircle } from "lucide-react";
-import { BookingData } from "@/pages/Agendar";
 import { useShopSettings } from "@/hooks/useShopSettings";
 import { toast } from "@/hooks/use-toast";
+import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
+import { Barber } from "@/hooks/useBarbers";
+
+interface LegacyBookingData {
+  service: ServiceWithCategory | null;
+  barber: Barber | null;
+  anyBarber: boolean;
+  date: string;
+  time: string;
+  clientName: string;
+  clientWhatsapp: string;
+}
 
 interface StepConfirmProps {
-  bookingData: BookingData;
+  bookingData: LegacyBookingData;
+  allServices?: ServiceWithCategory[];
+  totalPrice?: number;
+  totalDuration?: number;
+  totalDeposit?: number;
   onConfirm: () => void;
   isLoading: boolean;
 }
 
-export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmProps) {
+export function StepConfirm({ 
+  bookingData, 
+  allServices,
+  totalPrice: propTotalPrice,
+  totalDuration: propTotalDuration,
+  totalDeposit: propTotalDeposit,
+  onConfirm, 
+  isLoading 
+}: StepConfirmProps) {
   const { data: settings } = useShopSettings();
   const [paidConfirmed, setPaidConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const depositAmount = (bookingData.service as any)?.deposit_amount ?? 0;
+  // Use passed totals or compute from single service
+  const services = allServices && allServices.length > 0 ? allServices : (bookingData.service ? [bookingData.service] : []);
+  const displayPrice = propTotalPrice ?? services.reduce((sum, s) => sum + s.price, 0);
+  const displayDuration = propTotalDuration ?? services.reduce((sum, s) => sum + s.duration_minutes, 0);
+  const depositAmount = propTotalDeposit ?? services.reduce((sum, s) => sum + ((s as any).deposit_amount || 0), 0);
+  
   const hasDeposit = depositAmount > 0;
   const pixConfigured = !!settings?.pix_key_or_link;
 
@@ -42,7 +70,6 @@ export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmPr
     }
   };
 
-  // Button disabled if deposit required but not confirmed paid
   const confirmDisabled = isLoading || (hasDeposit && pixConfigured && !paidConfirmed);
 
   return (
@@ -55,14 +82,25 @@ export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmPr
       </div>
 
       <div className="glass-card rounded-2xl p-5 space-y-4">
-        {/* Service */}
-        <div className="flex items-center gap-4">
+        {/* Services */}
+        <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Scissors className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Serviço</p>
-            <p className="font-semibold">{bookingData.service?.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {services.length > 1 ? "Serviços" : "Serviço"}
+            </p>
+            <div className="space-y-1">
+              {services.map(s => (
+                <p key={s.id} className="font-semibold">{s.name}</p>
+              ))}
+            </div>
+            {services.length > 1 && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Tempo total: {displayDuration} min
+              </p>
+            )}
           </div>
         </div>
 
@@ -105,9 +143,9 @@ export function StepConfirm({ bookingData, onConfirm, isLoading }: StepConfirmPr
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Valor</p>
+            <p className="text-xs text-muted-foreground">Valor total</p>
             <p className="text-xl font-bold text-primary">
-              R$ {bookingData.service?.price.toFixed(2).replace(".", ",")}
+              R$ {displayPrice.toFixed(2).replace(".", ",")}
             </p>
           </div>
         </div>

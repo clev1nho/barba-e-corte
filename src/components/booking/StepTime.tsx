@@ -18,6 +18,7 @@ interface StepTimeProps {
   anyBarber: boolean;
   selectedDate: string;
   service: ServiceBase | null;
+  serviceDuration?: number; // Override duration for multi-service
   selected: string;
   onSelect: (time: string, barber?: Barber) => void;
 }
@@ -54,6 +55,7 @@ export function StepTime({
   anyBarber,
   selectedDate,
   service,
+  serviceDuration,
   selected,
   onSelect,
 }: StepTimeProps) {
@@ -97,7 +99,8 @@ export function StepTime({
     const shopOpen = timeToMinutes(daySchedule.open);
     const shopClose = timeToMinutes(daySchedule.close);
     const interval = settings.slot_interval_minutes || 30;
-    const serviceDuration = service.duration_minutes;
+    // Use override duration for multi-service, or single service duration
+    const totalDuration = serviceDuration || service.duration_minutes;
 
     const barbersToCheck = anyBarber ? barbers : selectedBarber ? [selectedBarber] : [];
     
@@ -127,7 +130,7 @@ export function StepTime({
       const startTime = Math.max(shopOpen, barberStart);
       const endTime = Math.min(shopClose, barberEnd);
 
-      for (let time = startTime; time + serviceDuration <= endTime; time += interval) {
+      for (let time = startTime; time + totalDuration <= endTime; time += interval) {
         const timeStr = minutesToTime(time);
 
         // Check if this slot is available (no conflicts)
@@ -137,7 +140,7 @@ export function StepTime({
           const aptStart = timeToMinutes(apt.time);
           const aptEnd = aptStart + (apt.duration_minutes || 30);
           const slotStart = time;
-          const slotEnd = time + serviceDuration;
+          const slotEnd = time + totalDuration;
 
           return slotStart < aptEnd && slotEnd > aptStart;
         });

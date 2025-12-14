@@ -77,19 +77,24 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { 
       service_id, 
+      service_ids,
       barber_id, 
       date, 
       time, 
       duration_minutes, 
       client_name, 
       client_whatsapp,
-      honeypot // Hidden field - if filled, it's a bot
+      client_email,
+      client_birth_date,
+      referral_source,
+      total_price,
+      total_deposit,
+      honeypot
     } = body;
 
-    // Honeypot check - bots will fill this hidden field
+    // Honeypot check
     if (honeypot) {
       console.log(`Honeypot triggered by IP: ${clientIp}`);
-      // Return success to not alert the bot
       return new Response(
         JSON.stringify({ success: true, id: "fake-id" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -156,12 +161,18 @@ Deno.serve(async (req) => {
       .from("appointments")
       .insert({
         service_id: service_id || null,
+        service_ids: service_ids || [],
         barber_id: barber_id || null,
         date,
         time,
         duration_minutes,
         client_name: trimmedName,
         client_whatsapp: cleanedWhatsapp,
+        client_email: client_email?.trim() || null,
+        client_birth_date: client_birth_date || null,
+        referral_source: referral_source || null,
+        total_price: total_price || 0,
+        total_deposit: total_deposit || 0,
         status: "Pendente"
       })
       .select("id")

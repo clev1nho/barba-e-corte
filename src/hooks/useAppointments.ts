@@ -82,13 +82,19 @@ export function useCreateAppointment() {
   return useMutation({
     mutationFn: async (appointment: {
       service_id: string;
+      service_ids?: string[];
       barber_id: string;
       date: string;
       time: string;
       duration_minutes: number;
       client_name: string;
       client_whatsapp: string;
-      honeypot?: string; // Hidden field for bot detection
+      client_email?: string;
+      client_birth_date?: string;
+      referral_source?: string;
+      total_price?: number;
+      total_deposit?: number;
+      honeypot?: string;
     }) => {
       // Use the rate-limited edge function instead of direct insert
       const { data, error } = await supabase.functions.invoke("create-booking", {
@@ -107,6 +113,7 @@ export function useCreateAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-appointments"] });
     },
   });
 }
