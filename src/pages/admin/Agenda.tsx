@@ -296,19 +296,25 @@ const Agenda = () => {
                           <Clock className="w-5 h-5 text-primary" />
                           <span className="font-bold text-xl">{apt.time}</span>
                         </div>
-                        <Select
-                          value={apt.status || "Pendente"}
-                          onValueChange={(value) => handleStatusChange(apt, value as AppointmentStatus)}
-                        >
-                          <SelectTrigger className={`w-auto h-8 text-xs border ${statusColors[apt.status || "Pendente"]}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {statusOptions.map((status) => (
-                              <SelectItem key={status} value={status}>{status}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {isAdminOrOwner ? (
+                          <Select
+                            value={apt.status || "Pendente"}
+                            onValueChange={(value) => handleStatusChange(apt, value as AppointmentStatus)}
+                          >
+                            <SelectTrigger className={`w-auto h-8 text-xs border ${statusColors[apt.status || "Pendente"]}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {statusOptions.map((status) => (
+                                <SelectItem key={status} value={status}>{status}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <span className={`px-2 py-1 text-xs rounded border ${statusColors[apt.status || "Pendente"]}`}>
+                            {apt.status || "Pendente"}
+                          </span>
+                        )}
                       </div>
 
                       <div className="space-y-2 text-sm">
