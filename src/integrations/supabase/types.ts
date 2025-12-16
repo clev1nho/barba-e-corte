@@ -95,6 +95,45 @@ export type Database = {
           },
         ]
       }
+      barber_commission_rates: {
+        Row: {
+          barber_id: string
+          category_id: string
+          commission_percent: number
+          created_at: string | null
+          id: string
+        }
+        Insert: {
+          barber_id: string
+          category_id: string
+          commission_percent?: number
+          created_at?: string | null
+          id?: string
+        }
+        Update: {
+          barber_id?: string
+          category_id?: string
+          commission_percent?: number
+          created_at?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barber_commission_rates_barber_id_fkey"
+            columns: ["barber_id"]
+            isOneToOne: false
+            referencedRelation: "barbers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barber_commission_rates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       barber_services: {
         Row: {
           barber_id: string
@@ -362,6 +401,7 @@ export type Database = {
           name: string
           open_time: string | null
           opening_hours: string | null
+          payment_method_fees: Json
           pix_key_or_link: string | null
           pix_message: string | null
           pix_note: string | null
@@ -396,6 +436,7 @@ export type Database = {
           name?: string
           open_time?: string | null
           opening_hours?: string | null
+          payment_method_fees?: Json
           pix_key_or_link?: string | null
           pix_message?: string | null
           pix_note?: string | null
@@ -430,6 +471,7 @@ export type Database = {
           name?: string
           open_time?: string | null
           opening_hours?: string | null
+          payment_method_fees?: Json
           pix_key_or_link?: string | null
           pix_message?: string | null
           pix_note?: string | null

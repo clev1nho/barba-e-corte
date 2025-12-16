@@ -10,6 +10,8 @@ import {
   FinancialTransaction,
 } from "@/hooks/useFinancialTransactions";
 import { useBarbers } from "@/hooks/useBarbers";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { CommissionsSection } from "@/components/admin/CommissionsSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,6 +118,7 @@ const Financeiro = () => {
   const [formBarberId, setFormBarberId] = useState<string>("");
 
   const { data: barbers } = useBarbers();
+  const { isAdminOrOwner } = useAdminAuth();
   const createTransaction = useCreateFinancialTransaction();
   const updateTransaction = useUpdateFinancialTransaction();
   const deleteTransaction = useDeleteFinancialTransaction();
@@ -335,6 +338,11 @@ const Financeiro = () => {
             </p>
           </div>
         </div>
+
+        {/* Commissions Section - Owner only */}
+        {isAdminOrOwner && (
+          <CommissionsSection startDate={dateRange.start} endDate={dateRange.end} />
+        )}
 
         {/* Actions */}
         <div className="flex justify-between items-center">

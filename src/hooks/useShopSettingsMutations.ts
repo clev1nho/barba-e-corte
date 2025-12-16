@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { WorkingHours } from "./useShopSettings";
+import { WorkingHours, PaymentMethodFees } from "./useShopSettings";
 import { Json } from "@/integrations/supabase/types";
 
 interface UpdateShopSettingsData {
@@ -26,6 +26,7 @@ interface UpdateShopSettingsData {
   maps_link?: string | null;
   footer_text?: string | null;
   opening_hours?: string | null;
+  payment_method_fees?: PaymentMethodFees | null;
 }
 
 function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {
@@ -33,14 +34,20 @@ function workingHoursToJson(wh: WorkingHours | undefined): Json | undefined {
   return wh as unknown as Json;
 }
 
+function paymentFeesToJson(fees: PaymentMethodFees | null | undefined): Json | undefined {
+  if (!fees) return undefined;
+  return fees as unknown as Json;
+}
+
 export function useUpdateShopSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, working_hours, ...rest }: UpdateShopSettingsData) => {
+    mutationFn: async ({ id, working_hours, payment_method_fees, ...rest }: UpdateShopSettingsData) => {
       const data = {
         ...rest,
         working_hours: workingHoursToJson(working_hours),
+        payment_method_fees: paymentFeesToJson(payment_method_fees),
       };
       
       console.log("Saving shop settings:", { id, data });

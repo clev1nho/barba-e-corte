@@ -18,6 +18,13 @@ export interface WorkingHours {
   domingo: DaySchedule;
 }
 
+export interface PaymentMethodFees {
+  pix: number;
+  cash: number;
+  debit: number;
+  credit: number;
+}
+
 export interface ShopSettings {
   id: string;
   name: string;
@@ -41,6 +48,7 @@ export interface ShopSettings {
   maps_link: string | null;
   footer_text: string | null;
   opening_hours: string | null;
+  payment_method_fees: PaymentMethodFees | null;
 }
 
 const DEFAULT_WORKING_HOURS: WorkingHours = {
@@ -116,6 +124,7 @@ export function useShopSettings() {
           maps_link: (data as any).maps_link ?? null,
           footer_text: (data as any).footer_text ?? null,
           opening_hours: (data as any).opening_hours ?? null,
+          payment_method_fees: (data as any).payment_method_fees ?? null,
         } as ShopSettings;
       }
       
