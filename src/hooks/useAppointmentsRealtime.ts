@@ -62,10 +62,10 @@ export const useAppointmentsRealtime = ({
               // Ignora erro, usa nome padrão
             }
 
-            // Se o agendamento é para a data selecionada, refetch
-            if (newAppointment.date === selectedDate) {
-              queryClient.invalidateQueries({ queryKey: ["appointments"] });
-            }
+            // Invalidar TODAS as queries de appointments (Dashboard e Agenda)
+            // Mesmo se não for da data selecionada, para garantir consistência
+            queryClient.invalidateQueries({ queryKey: ["appointments"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-appointments"] });
 
             // Notificar sempre (dados não sensíveis)
             toast({
@@ -83,8 +83,9 @@ export const useAppointmentsRealtime = ({
           },
           (payload) => {
             console.log("Realtime: agendamento atualizado", payload);
-            // Sempre invalida cache para refletir mudança de status
+            // Sempre invalida cache para refletir mudança de status (Dashboard e Agenda)
             queryClient.invalidateQueries({ queryKey: ["appointments"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-appointments"] });
           }
         )
         .subscribe((status) => {
