@@ -12,6 +12,9 @@ export interface Appointment {
   duration_minutes: number;
   client_name: string;
   client_whatsapp: string;
+  client_email: string | null;
+  client_birth_date: string | null;
+  referral_source: string | null;
   status: AppointmentStatus | null;
   notes: string | null;
   created_at: string | null;
