@@ -4,6 +4,7 @@ import { useAppointments, useUpdateAppointmentStatus, useDeleteAppointment, Appo
 import { useCreateFinancialTransaction } from "@/hooks/useFinancialTransactions";
 import { useBarbers } from "@/hooks/useBarbers";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAppointmentsRealtime } from "@/hooks/useAppointmentsRealtime";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Clock, User, Scissors, Phone, Trash2, ChevronLeft, ChevronRight, DollarSign, Users, X, Mail, Cake, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -85,6 +86,12 @@ const Agenda = () => {
   const updateStatus = useUpdateAppointmentStatus();
   const deleteAppointment = useDeleteAppointment();
   const createFinancialTransaction = useCreateFinancialTransaction();
+
+  // Realtime: escuta novos agendamentos e atualizações (apenas quando autenticado)
+  useAppointmentsRealtime({ 
+    selectedDate: dateString, 
+    enabled: hasAdminAccess 
+  });
 
   const handleBarberSelect = (barberId: string) => {
     setSelectedBarberId(barberId);
