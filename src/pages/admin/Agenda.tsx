@@ -5,7 +5,7 @@ import { useCreateFinancialTransaction } from "@/hooks/useFinancialTransactions"
 import { useBarbers } from "@/hooks/useBarbers";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Calendar, Clock, User, Scissors, Phone, Trash2, ChevronLeft, ChevronRight, DollarSign, Users, X } from "lucide-react";
+import { Calendar, Clock, User, Scissors, Phone, Trash2, ChevronLeft, ChevronRight, DollarSign, Users, X, Mail, Cake, MessageSquare, ChevronDown, ChevronUp } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { format, addDays, subDays } from "date-fns";
@@ -61,6 +61,7 @@ const Agenda = () => {
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [pendingAppointment, setPendingAppointment] = useState<Appointment | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("pix");
+  const [expandedAppointmentId, setExpandedAppointmentId] = useState<string | null>(null);
   
   // Initialize barber selection from localStorage for both owner and staff
   useEffect(() => {
@@ -322,17 +323,54 @@ const Agenda = () => {
                           <User className="w-4 h-4 text-muted-foreground" />
                           <span className="font-medium">{apt.client_name}</span>
                         </div>
-                        {/* Only show phone/WhatsApp for owner, hide for staff */}
-                        {isAdminOrOwner && (
-                          <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <span>{apt.client_whatsapp}</span>
-                          </div>
-                        )}
                         <div className="flex items-center gap-2">
                           <Scissors className="w-4 h-4 text-muted-foreground" />
                           <span>{apt.services?.name || "Serviço"}</span>
                         </div>
+                        
+                        {/* Owner-only: Full client details in expandable section */}
+                        {isAdminOrOwner && (
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <button
+                              onClick={() => setExpandedAppointmentId(
+                                expandedAppointmentId === apt.id ? null : apt.id
+                              )}
+                              className="flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors"
+                            >
+                              {expandedAppointmentId === apt.id ? (
+                                <ChevronUp className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                              Ver dados do cliente
+                            </button>
+                            
+                            {expandedAppointmentId === apt.id && (
+                              <div className="mt-3 space-y-2 bg-muted/30 rounded-lg p-3">
+                                <div className="flex items-center gap-2">
+                                  <Phone className="w-4 h-4 text-muted-foreground" />
+                                  <span>{apt.client_whatsapp || "Não informado"}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Mail className="w-4 h-4 text-muted-foreground" />
+                                  <span>{apt.client_email || "Não informado"}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Cake className="w-4 h-4 text-muted-foreground" />
+                                  <span>
+                                    {apt.client_birth_date 
+                                      ? new Date(apt.client_birth_date).toLocaleDateString("pt-BR")
+                                      : "Não informado"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <MessageSquare className="w-4 h-4 text-muted-foreground" />
+                                  <span>{apt.referral_source || "Não informado"}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex justify-end mt-4">
