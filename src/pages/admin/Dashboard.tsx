@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useDashboardAppointments, useUpdateAppointmentStatus, AppointmentStatus } from "@/hooks/useAppointments";
+import { useAppointmentsRealtime } from "@/hooks/useAppointmentsRealtime";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Calendar, Clock, User, Scissors, CheckCircle, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -20,6 +22,13 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const { data: appointments, isLoading } = useDashboardAppointments(selectedDate);
   const updateStatus = useUpdateAppointmentStatus();
+  const { hasAdminAccess } = useAdminAuth();
+
+  // Realtime: escuta novos agendamentos e atualizações (apenas quando autenticado)
+  useAppointmentsRealtime({ 
+    selectedDate, 
+    enabled: hasAdminAccess 
+  });
 
   const handleStatusChange = (id: string, status: AppointmentStatus) => {
     updateStatus.mutate({ id, status });
