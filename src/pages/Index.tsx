@@ -3,6 +3,7 @@ import { About } from "@/components/landing/About";
 import { CategoriesSection } from "@/components/landing/CategoriesSection";
 import { GallerySection } from "@/components/landing/GallerySection";
 import { BarbersList } from "@/components/landing/BarbersList";
+import { HomeCardsSection } from "@/components/landing/HomeCardsSection";
 import { TestimonialsList } from "@/components/landing/TestimonialsList";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
@@ -34,6 +35,7 @@ const Index = () => {
       <CategoriesSection />
       <GallerySection />
       <BarbersList barbers={barbers ?? []} isLoading={loadingBarbers} />
+      <HomeCardsSection />
       <TestimonialsList testimonials={testimonials ?? []} isLoading={loadingTestimonials} />
       <FinalCTA />
       <Footer />
