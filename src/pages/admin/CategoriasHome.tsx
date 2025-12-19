@@ -9,6 +9,7 @@ import {
   useDeleteServiceCategory,
 } from "@/hooks/useServiceCategoryMutations";
 import { ServiceCategoryIconUpload } from "@/components/admin/ServiceCategoryIconUpload";
+import { AdminHomeCardsManager } from "@/components/admin/AdminHomeCardsManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -361,6 +362,9 @@ const CategoriasHome = () => {
           )}
           Salvar Alterações
         </Button>
+
+        {/* Home Cards Section */}
+        <AdminHomeCardsManager />
       </div>
     </AdminLayout>
   );

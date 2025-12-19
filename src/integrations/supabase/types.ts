@@ -297,6 +297,45 @@ export type Database = {
         }
         Relationships: []
       }
+      home_cards: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          icon_key: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_url: string
+          subtitle: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          icon_key?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          icon_key?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_url?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       service_categories: {
         Row: {
           created_at: string | null
