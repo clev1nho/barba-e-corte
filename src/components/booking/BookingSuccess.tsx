@@ -58,13 +58,11 @@ export function BookingSuccess({
       })
     : "";
 
-  // Normalize phone number using the helper
   const normalizedPhone = normalizeWhatsAppNumber(settings?.whatsapp);
   const hasWhatsApp = !!settings?.whatsapp?.trim();
 
   const servicesText = services.map(s => s.name).join(", ");
   
-  // Build message (NOT encoded yet - the helper will encode it)
   const whatsappMessage = 
     `👤 Nome: ${bookingData.clientName}\n` +
     `✂️ Serviço${services.length > 1 ? 's' : ''}: ${servicesText}\n` +
@@ -116,12 +114,12 @@ export function BookingSuccess({
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/10">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/8 border border-primary/15">
             <CheckCircle className="w-14 h-14 text-primary" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold mb-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <h1 className="text-2xl font-bold mb-2 animate-fade-in font-display" style={{ animationDelay: "0.1s" }}>
           Agendamento realizado!
         </h1>
         <p className="text-muted-foreground mb-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
@@ -131,13 +129,13 @@ export function BookingSuccess({
           Use o botão abaixo para confirmar no WhatsApp.
         </p>
 
-        <div className="glass-card rounded-2xl p-5 mb-8 text-left animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <div className="glass-card rounded-2xl p-5 mb-8 text-left animate-slide-up border-primary/8" style={{ animationDelay: "0.3s" }}>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">Data e horário</p>
-                <p className="font-semibold capitalize">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Data e horário</p>
+                <p className="font-semibold capitalize text-sm">
                   {formattedDate} às {bookingData.time}
                 </p>
               </div>
@@ -148,11 +146,11 @@ export function BookingSuccess({
                 ✂️
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
                   {services.length > 1 ? "Serviços" : "Serviço"}
                 </p>
                 {services.map(s => (
-                  <p key={s.id} className="font-semibold">{s.name}</p>
+                  <p key={s.id} className="font-semibold text-sm">{s.name}</p>
                 ))}
               </div>
             </div>
@@ -162,8 +160,8 @@ export function BookingSuccess({
                 💈
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Barbeiro</p>
-                <p className="font-semibold">{bookingData.barber?.name}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Barbeiro</p>
+                <p className="font-semibold text-sm">{bookingData.barber?.name}</p>
               </div>
             </div>
 
@@ -173,15 +171,15 @@ export function BookingSuccess({
                   🔖
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Código</p>
-                  <p className="font-semibold font-mono">{appointmentId.slice(0, 8).toUpperCase()}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Código</p>
+                  <p className="font-semibold font-mono text-sm">{appointmentId.slice(0, 8).toUpperCase()}</p>
                 </div>
               </div>
             )}
 
-            <div className="pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground">Valor total</p>
-              <p className="text-xl font-bold text-primary">
+            <div className="pt-3 border-t border-border/30">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Valor total</p>
+              <p className="text-2xl font-bold text-primary">
                 R$ {displayPrice.toFixed(2).replace(".", ",")}
               </p>
             </div>
@@ -191,7 +189,7 @@ export function BookingSuccess({
         <div className="space-y-3 animate-slide-up" style={{ animationDelay: "0.4s" }}>
           {hasWhatsApp ? (
             <Button 
-              variant="default" 
+              variant="gold" 
               size="lg" 
               className="w-full"
               onClick={handleOpenWhatsApp}
@@ -200,20 +198,20 @@ export function BookingSuccess({
               Confirmar no WhatsApp
             </Button>
           ) : (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/8 text-destructive text-sm border border-destructive/15">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>WhatsApp da barbearia não configurado no painel.</span>
             </div>
           )}
 
           {popupBlockedUrl && (
-            <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted text-sm text-muted-foreground border border-border">
+            <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted/40 text-sm text-muted-foreground border border-border/30">
               <p>Seu navegador bloqueou a abertura automática do WhatsApp.</p>
               <a
                 href={popupBlockedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors duration-220"
               >
                 Abrir WhatsApp Web
               </a>
@@ -221,7 +219,7 @@ export function BookingSuccess({
           )}
 
           <Link to="/">
-            <Button variant="outline" size="lg" className="w-full">
+            <Button variant="outline" size="lg" className="w-full border-primary/15 hover:border-primary/25">
               <Home className="w-5 h-5" />
               Voltar para o início
             </Button>

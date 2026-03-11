@@ -5,18 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold ring-offset-background transition-all duration-220 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/85 shadow-md shadow-primary/20",
+        default: "bg-primary text-primary-foreground hover:bg-primary/85 shadow-md shadow-primary/15 shimmer-hover",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-border bg-transparent hover:bg-muted hover:text-foreground hover:border-muted-foreground/30",
+        outline: "border border-border bg-transparent hover:bg-muted/60 hover:text-foreground hover:border-muted-foreground/25 transition-all duration-220",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-muted hover:text-foreground",
+        ghost: "hover:bg-muted/60 hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        gold: "bg-gradient-to-r from-gold-dark via-primary to-gold-light text-primary-foreground hover:opacity-90 shadow-md shadow-primary/20",
-        hero: "bg-gradient-to-r from-gold-dark via-primary to-gold-light text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/30 text-base font-bold tracking-wide",
+        gold: "bg-gradient-to-r from-gold-dark via-primary to-gold-light text-primary-foreground hover:opacity-90 shadow-md shadow-primary/15 shimmer-hover",
+        hero: "bg-gradient-to-r from-gold-dark via-primary to-gold-light text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/25 text-base font-bold tracking-wide shimmer-hover",
       },
       size: {
         default: "h-11 px-5 py-2",

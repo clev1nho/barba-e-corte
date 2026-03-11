@@ -46,7 +46,7 @@ const AdminLogin = () => {
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors duration-200">
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors duration-220 text-sm">
           <ArrowLeft className="w-4 h-4" />
           Voltar ao site
         </Link>
@@ -59,7 +59,7 @@ const AdminLogin = () => {
               className="h-20 w-auto mx-auto mb-5 object-contain"
             />
           ) : (
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-gold mb-5 shadow-lg shadow-primary/15">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-gold mb-5 shadow-[var(--shadow-premium)]">
               <Scissors className="w-10 h-10 text-primary-foreground" />
             </div>
           )}
@@ -70,7 +70,7 @@ const AdminLogin = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">E-mail</Label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -86,7 +86,7 @@ const AdminLogin = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Senha</Label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -101,7 +101,7 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          <Button type="submit" variant="gold" size="lg" className="w-full" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />

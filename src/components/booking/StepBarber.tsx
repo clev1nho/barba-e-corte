@@ -17,10 +17,10 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
         {[1, 2, 3].map((i) => (
           <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-muted" />
+              <div className="w-14 h-14 rounded-full bg-muted/40" />
               <div className="flex-1">
-                <div className="h-5 bg-muted rounded w-24 mb-2" />
-                <div className="h-4 bg-muted rounded w-full" />
+                <div className="h-5 bg-muted/40 rounded w-24 mb-2" />
+                <div className="h-4 bg-muted/40 rounded w-full" />
               </div>
             </div>
           </div>
@@ -35,12 +35,12 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
 
       <button
         onClick={() => onSelect(null, true)}
-        className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-200 ${
-          anyBarber ? "ring-2 ring-primary bg-primary/8 border-primary/20" : "hover:bg-muted/30 hover:border-primary/10"
+        className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-220 ${
+          anyBarber ? "ring-2 ring-primary bg-primary/6 border-primary/20" : "hover:bg-muted/20 hover:border-primary/10"
         }`}
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-muted/60 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-muted/40 flex items-center justify-center border border-border/30">
             <Users className="w-7 h-7 text-muted-foreground" />
           </div>
           <div className="flex-1">
@@ -61,10 +61,10 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
         <button
           key={barber.id}
           onClick={() => onSelect(barber, false)}
-          className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-200 ${
+          className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-220 ${
             selected?.id === barber.id && !anyBarber
-              ? "ring-2 ring-primary bg-primary/8 border-primary/20"
-              : "hover:bg-muted/30 hover:border-primary/10"
+              ? "ring-2 ring-primary bg-primary/6 border-primary/20"
+              : "hover:bg-muted/20 hover:border-primary/10"
           }`}
         >
           <div className="flex items-center gap-4">
@@ -72,7 +72,7 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
               <img
                 src={barber.photo_url}
                 alt={barber.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-primary/20"
+                className="w-14 h-14 rounded-full object-cover border-2 border-primary/15"
               />
             ) : (
               <div className="w-14 h-14 rounded-full bg-gradient-gold flex items-center justify-center">
