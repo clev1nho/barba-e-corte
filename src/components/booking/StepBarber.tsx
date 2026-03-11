@@ -13,7 +13,7 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold mb-6">Escolha o barbeiro</h2>
+        <h2 className="text-xl font-bold mb-6 font-display">Escolha o barbeiro</h2>
         {[1, 2, 3].map((i) => (
           <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
             <div className="flex items-center gap-4">
@@ -30,18 +30,17 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold mb-6">Escolha o barbeiro</h2>
+    <div className="space-y-3.5">
+      <h2 className="text-xl font-bold mb-6 font-display tracking-tight">Escolha o barbeiro</h2>
 
-      {/* Any barber option */}
       <button
         onClick={() => onSelect(null, true)}
-        className={`w-full text-left glass-card rounded-xl p-4 transition-all ${
-          anyBarber ? "ring-2 ring-primary bg-primary/10" : "hover:bg-muted/50"
+        className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-200 ${
+          anyBarber ? "ring-2 ring-primary bg-primary/8 border-primary/20" : "hover:bg-muted/30 hover:border-primary/10"
         }`}
       >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-muted/60 flex items-center justify-center">
             <Users className="w-7 h-7 text-muted-foreground" />
           </div>
           <div className="flex-1">
@@ -58,15 +57,14 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
         </div>
       </button>
 
-      {/* Individual barbers */}
       {barbers.map((barber) => (
         <button
           key={barber.id}
           onClick={() => onSelect(barber, false)}
-          className={`w-full text-left glass-card rounded-xl p-4 transition-all ${
+          className={`w-full text-left glass-card rounded-xl p-4 transition-all duration-200 ${
             selected?.id === barber.id && !anyBarber
-              ? "ring-2 ring-primary bg-primary/10"
-              : "hover:bg-muted/50"
+              ? "ring-2 ring-primary bg-primary/8 border-primary/20"
+              : "hover:bg-muted/30 hover:border-primary/10"
           }`}
         >
           <div className="flex items-center gap-4">
@@ -74,10 +72,10 @@ export function StepBarber({ barbers, isLoading, selected, anyBarber, onSelect }
               <img
                 src={barber.photo_url}
                 alt={barber.name}
-                className="w-14 h-14 rounded-full object-cover border-2 border-primary/30"
+                className="w-14 h-14 rounded-full object-cover border-2 border-primary/20"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold-dark to-primary flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-gradient-gold flex items-center justify-center">
                 <User className="w-7 h-7 text-primary-foreground" />
               </div>
             )}
