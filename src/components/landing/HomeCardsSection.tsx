@@ -1,6 +1,5 @@
 import { useActiveHomeCards } from "@/hooks/useHomeCards";
 import { useNavigate } from "react-router-dom";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import {
   MessageCircle,
   Lock,
@@ -23,7 +22,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 export function HomeCardsSection() {
   const { data: cards, isLoading } = useActiveHomeCards();
   const navigate = useNavigate();
-  const ref = useScrollReveal();
 
   if (isLoading || !cards?.length) {
     return null;
@@ -38,7 +36,7 @@ export function HomeCardsSection() {
   };
 
   return (
-    <section className="py-12 px-4" ref={ref}>
+    <section className="py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {cards.map((card, index) => {
@@ -48,8 +46,8 @@ export function HomeCardsSection() {
               <button
                 key={card.id}
                 onClick={() => handleCardClick(card.link_url)}
-                className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-primary/10 shadow-[var(--shadow-card)] group transition-all duration-220 hover:border-primary/25 hover:shadow-[var(--shadow-lift)] hover:-translate-y-0.5 reveal-on-scroll text-left"
-                style={{ transitionDelay: `${index * 80}ms` }}
+                className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-primary/15 shadow-lg group transition-all duration-300 hover:border-primary/35 hover:shadow-[var(--shadow-glow)] animate-fade-in text-left"
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {card.image_url ? (
                   <img
@@ -61,7 +59,7 @@ export function HomeCardsSection() {
                   <div className="absolute inset-0 bg-gradient-to-br from-charcoal-light to-charcoal" />
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/40 to-background/15" />
 
                 {/* Icon badge */}
                 <div className="absolute top-3.5 right-3.5 w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center shadow-md">
@@ -74,7 +72,7 @@ export function HomeCardsSection() {
                     {card.title}
                   </h3>
                   {card.subtitle && (
-                    <p className="text-sm text-foreground/65 mt-1 drop-shadow font-sans">
+                    <p className="text-sm text-foreground/70 mt-1 drop-shadow font-sans">
                       {card.subtitle}
                     </p>
                   )}

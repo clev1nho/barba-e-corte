@@ -8,9 +8,9 @@ export function Footer() {
   const footerText = settings?.footer_text?.trim();
 
   return (
-    <footer className="py-12 px-4 border-t border-border/30 bg-card/20">
+    <footer className="py-10 px-4 border-t border-border/50">
       <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-center gap-2.5 mb-6">
+        <div className="flex items-center justify-center gap-2.5 mb-5">
           {settings?.logo_url ? (
             <img 
               src={settings.logo_url} 
@@ -26,19 +26,19 @@ export function Footer() {
         </div>
 
         <div className="flex justify-center gap-8 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary transition-colors duration-220">
+          <Link to="/" className="hover:text-primary transition-colors duration-200">
             Início
           </Link>
-          <Link to="/agendar" className="hover:text-primary transition-colors duration-220">
+          <Link to="/agendar" className="hover:text-primary transition-colors duration-200">
             Agendar
           </Link>
-          <Link to="/admin/login" className="hover:text-primary transition-colors duration-220">
+          <Link to="/admin/login" className="hover:text-primary transition-colors duration-200">
             Admin
           </Link>
         </div>
 
         {footerText && footerText.length > 0 && (
-          <p className="text-center text-xs text-muted-foreground/50 mt-8">
+          <p className="text-center text-xs text-muted-foreground/70 mt-8">
             {footerText}
           </p>
         )}

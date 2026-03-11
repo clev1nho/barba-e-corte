@@ -50,7 +50,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -61,20 +61,17 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Premium Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/30">
-        <div className="px-4 py-3.5 flex items-center justify-between max-w-4xl mx-auto">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50">
+        <div className="px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-1 h-7 bg-gradient-gold rounded-full" />
-            <div>
-              <h1 className="font-bold text-lg font-display tracking-tight leading-tight">{title}</h1>
-              <p className="text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em] font-medium">Painel administrativo</p>
-            </div>
+            <div className="w-1 h-6 bg-gradient-gold rounded-full" />
+            <h1 className="font-bold text-lg font-display tracking-tight">{title}</h1>
           </div>
           <button
             onClick={handleBackToSite}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-primary/8 text-primary hover:bg-primary/12 transition-all duration-220 font-medium border border-primary/10"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200 font-medium"
           >
-            <Home className="w-3.5 h-3.5" />
+            <Home className="w-4 h-4" />
             <span className="hidden sm:inline">Voltar ao site</span>
           </button>
         </div>
@@ -84,19 +81,19 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       <main className="pb-24 px-4 py-6 max-w-4xl mx-auto">{children}</main>
 
       {/* Premium Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/30 safe-area-pb">
-        <div className="flex overflow-x-auto scrollbar-hide py-2 px-1 max-w-4xl mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-area-pb">
+        <div className="flex overflow-x-auto scrollbar-hide py-2 px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-220 flex-shrink-0 min-w-[72px] ${
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 flex-shrink-0 min-w-[72px] ${
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <div className={`p-1.5 rounded-lg transition-all duration-220 ${isActive ? "bg-primary/10 shadow-sm" : ""}`}>
+                <div className={`p-1 rounded-lg transition-colors ${isActive ? "bg-primary/10" : ""}`}>
                   <item.icon className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] whitespace-nowrap font-medium">{item.label}</span>
@@ -105,9 +102,9 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           })}
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground hover:text-destructive transition-all duration-220 flex-shrink-0 min-w-[72px]"
+            className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors duration-200 flex-shrink-0 min-w-[72px]"
           >
-            <div className="p-1.5">
+            <div className="p-1">
               <LogOut className="w-5 h-5" />
             </div>
             <span className="text-[10px] whitespace-nowrap font-medium">Sair</span>

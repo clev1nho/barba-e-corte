@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useGalleryImages } from "@/hooks/useGalleryImages";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const staticImages = [
   { id: "1", image_url: "/gallery/space-1.png", alt_text: "Sala de corte" },
@@ -13,7 +12,6 @@ const staticImages = [
 export function GallerySection() {
   const { data: dbImages } = useGalleryImages();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const ref = useScrollReveal();
 
   const images = dbImages && dbImages.length > 0 ? dbImages : staticImages;
 
@@ -33,11 +31,11 @@ export function GallerySection() {
   };
 
   return (
-    <section className="section-premium" id="espaco" ref={ref}>
+    <section className="section-premium" id="espaco">
       <div className="max-w-4xl mx-auto">
-        <div className="premium-divider reveal-on-scroll" />
-        <h2 className="section-heading reveal-on-scroll">Nosso Espaço</h2>
-        <p className="section-subheading reveal-on-scroll">
+        <div className="premium-divider" />
+        <h2 className="section-heading">Nosso Espaço</h2>
+        <p className="section-subheading">
           Ambiente exclusivo e sofisticado para seu bem-estar
         </p>
 
@@ -46,15 +44,14 @@ export function GallerySection() {
             <button
               key={image.id}
               onClick={() => openLightbox(index)}
-              className="relative aspect-square rounded-xl overflow-hidden group focus:outline-none focus:ring-2 focus:ring-primary/40 border border-border/30 transition-all duration-220 hover:border-primary/25 hover:shadow-[var(--shadow-lift)] reveal-on-scroll"
-              style={{ transitionDelay: `${index * 60}ms` }}
+              className="relative aspect-square rounded-xl overflow-hidden group focus:outline-none focus:ring-2 focus:ring-primary/50 border border-border/40 transition-all duration-300 hover:border-primary/30"
             >
               <img
                 src={image.image_url}
                 alt={image.alt_text || "Foto do espaço"}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </button>
           ))}
         </div>
@@ -62,19 +59,19 @@ export function GallerySection() {
         {/* Lightbox */}
         {selectedIndex !== null && (
           <div 
-            className="fixed inset-0 z-50 bg-background/97 backdrop-blur-md flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center"
             onClick={closeLightbox}
           >
             <button
               onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
-              className="absolute top-4 right-4 p-2 text-foreground/50 hover:text-foreground transition-colors duration-220"
+              className="absolute top-4 right-4 p-2 text-foreground/60 hover:text-foreground transition-colors"
             >
               <X className="w-8 h-8" />
             </button>
             
             <button
               onClick={(e) => { e.stopPropagation(); goPrev(); }}
-              className="absolute left-4 p-2 text-foreground/50 hover:text-foreground transition-colors duration-220"
+              className="absolute left-4 p-2 text-foreground/60 hover:text-foreground transition-colors"
             >
               <ChevronLeft className="w-10 h-10" />
             </button>
@@ -88,12 +85,12 @@ export function GallerySection() {
             
             <button
               onClick={(e) => { e.stopPropagation(); goNext(); }}
-              className="absolute right-4 p-2 text-foreground/50 hover:text-foreground transition-colors duration-220"
+              className="absolute right-4 p-2 text-foreground/60 hover:text-foreground transition-colors"
             >
               <ChevronRight className="w-10 h-10" />
             </button>
             
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-foreground/50 text-sm font-sans">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-foreground/60 text-sm font-sans">
               {selectedIndex + 1} / {images.length}
             </div>
           </div>

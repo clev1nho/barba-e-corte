@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StepServiceMulti } from "@/components/booking/StepServiceMulti";
 import { StepBarber } from "@/components/booking/StepBarber";
@@ -138,22 +138,22 @@ const Agendar = () => {
   return (
     <main className="min-h-screen bg-background">
       {/* Premium Header */}
-      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/40">
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
           {step === 1 ? (
             <Link to="/">
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted/50">
+              <Button variant="ghost" size="icon" className="rounded-full">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
-            <Button variant="ghost" size="icon" onClick={prevStep} className="rounded-full hover:bg-muted/50">
+            <Button variant="ghost" size="icon" onClick={prevStep} className="rounded-full">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
           <div className="flex-1">
             <h1 className="font-semibold font-display text-lg tracking-tight">Agendar horário</h1>
-            <p className="text-xs text-muted-foreground font-sans">
+            <p className="text-xs text-muted-foreground">
               Passo {step} de {totalSteps}
             </p>
           </div>
@@ -167,25 +167,17 @@ const Agendar = () => {
               const isActive = stepNum === step;
               const isCompleted = stepNum < step;
               return (
-                <div key={label} className="flex-1 flex flex-col items-center gap-1.5">
-                  <div className="relative w-full">
-                    <div className="h-1 w-full rounded-full bg-muted/60" />
-                    <div
-                      className={`absolute top-0 left-0 h-1 rounded-full transition-all duration-500 ease-out ${
-                        isCompleted ? "bg-primary w-full" : isActive ? "bg-primary/60 w-full" : "w-0"
-                      }`}
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {isCompleted && (
-                      <Check className="w-2.5 h-2.5 text-primary" />
-                    )}
-                    <span className={`text-[9px] font-medium transition-colors duration-220 ${
-                      isActive ? "text-primary" : isCompleted ? "text-foreground/50" : "text-muted-foreground/40"
-                    }`}>
-                      {label}
-                    </span>
-                  </div>
+                <div key={label} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className={`h-1 w-full rounded-full transition-all duration-300 ${
+                      isCompleted ? "bg-primary" : isActive ? "bg-primary/70" : "bg-muted"
+                    }`}
+                  />
+                  <span className={`text-[9px] font-medium transition-colors ${
+                    isActive ? "text-primary" : isCompleted ? "text-foreground/60" : "text-muted-foreground/50"
+                  }`}>
+                    {label}
+                  </span>
                 </div>
               );
             })}

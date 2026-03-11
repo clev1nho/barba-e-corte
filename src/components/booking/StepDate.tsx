@@ -38,6 +38,7 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
 
   const allowSameDay = settings?.allow_same_day ?? true;
 
+  // Get available days of week from barbers
   const getAvailableDaysOfWeek = (): Set<number> => {
     const days = new Set<number>();
     const barbersToCheck = anyBarber ? barbers : selectedBarber ? [selectedBarber] : [];
@@ -57,8 +58,14 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
   const isDateAvailable = (date: Date): boolean => {
     const dateOnly = new Date(date);
     dateOnly.setHours(0, 0, 0, 0);
+
+    // Past dates
     if (dateOnly < today) return false;
+
+    // Same day check
     if (dateOnly.getTime() === today.getTime() && !allowSameDay) return false;
+
+    // Check day of week
     return availableDays.has(dateOnly.getDay());
   };
 
@@ -69,13 +76,19 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDay = firstDay.getDay();
+
     const days: (Date | null)[] = [];
+
+    // Empty slots before first day
     for (let i = 0; i < startingDay; i++) {
       days.push(null);
     }
+
+    // Days of month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
+
     return days;
   };
 
@@ -97,17 +110,17 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold font-display tracking-tight">Escolha a data</h2>
+      <h2 className="text-xl font-bold">Escolha a data</h2>
 
       {/* Month navigation */}
-      <div className="flex items-center justify-between glass-card rounded-xl p-3">
-        <Button variant="ghost" size="icon" onClick={prevMonth} className="hover:bg-muted/50">
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={prevMonth}>
           <ChevronLeft className="w-5 h-5" />
         </Button>
-        <span className="font-semibold text-sm">
+        <span className="font-semibold">
           {MONTHS_PT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </span>
-        <Button variant="ghost" size="icon" onClick={nextMonth} className="hover:bg-muted/50">
+        <Button variant="ghost" size="icon" onClick={nextMonth}>
           <ChevronRight className="w-5 h-5" />
         </Button>
       </div>
@@ -115,7 +128,7 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
       {/* Days header */}
       <div className="grid grid-cols-7 gap-1">
         {DAYS_PT.map((day) => (
-          <div key={day} className="text-center text-[10px] text-muted-foreground/60 py-2 uppercase tracking-wider font-medium">
+          <div key={day} className="text-center text-xs text-muted-foreground py-2">
             {day}
           </div>
         ))}
@@ -138,13 +151,13 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
               key={dateStr}
               onClick={() => isAvailable && onSelect(dateStr)}
               disabled={!isAvailable}
-              className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-220 ${
+              className={`aspect-square rounded-xl flex items-center justify-center text-sm font-medium transition-all ${
                 isSelected
-                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  ? "bg-primary text-primary-foreground"
                   : isAvailable
-                  ? "hover:bg-muted/50 text-foreground"
-                  : "text-muted-foreground/20 cursor-not-allowed"
-              } ${isToday && !isSelected ? "ring-1 ring-primary/40" : ""}`}
+                  ? "hover:bg-muted text-foreground"
+                  : "text-muted-foreground/30 cursor-not-allowed"
+              } ${isToday && !isSelected ? "ring-1 ring-primary" : ""}`}
             >
               {isSelected ? (
                 <Check className="w-4 h-4" />
