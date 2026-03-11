@@ -23,7 +23,6 @@ export function HomeCardsSection() {
   const { data: cards, isLoading } = useActiveHomeCards();
   const navigate = useNavigate();
 
-  // Não mostrar seção se não há cards ativos
   if (isLoading || !cards?.length) {
     return null;
   }
@@ -47,35 +46,33 @@ export function HomeCardsSection() {
               <button
                 key={card.id}
                 onClick={() => handleCardClick(card.link_url)}
-                className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-gold/30 shadow-lg group transition-all duration-300 hover:scale-[1.02] hover:border-gold/60 hover:shadow-xl animate-fade-in text-left"
+                className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-primary/15 shadow-lg group transition-all duration-300 hover:border-primary/35 hover:shadow-[var(--shadow-glow)] animate-fade-in text-left"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                {/* Background image or gradient */}
                 {card.image_url ? (
                   <img
                     src={card.image_url}
                     alt={card.title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-charcoal-light to-charcoal" />
                 )}
 
-                {/* Dark overlay for text legibility */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/85 via-background/40 to-background/15" />
 
-                {/* Icon badge - top right */}
-                <div className="absolute top-3 right-3 w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center shadow-lg">
+                {/* Icon badge */}
+                <div className="absolute top-3.5 right-3.5 w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center shadow-md">
                   <IconComponent className="w-5 h-5 text-primary-foreground" />
                 </div>
 
-                {/* Text content - bottom left */}
+                {/* Text content */}
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-lg md:text-xl font-semibold text-white drop-shadow-md">
+                  <h3 className="text-lg md:text-xl font-semibold text-foreground drop-shadow-md font-display">
                     {card.title}
                   </h3>
                   {card.subtitle && (
-                    <p className="text-sm text-white/80 mt-1 drop-shadow">
+                    <p className="text-sm text-foreground/70 mt-1 drop-shadow font-sans">
                       {card.subtitle}
                     </p>
                   )}

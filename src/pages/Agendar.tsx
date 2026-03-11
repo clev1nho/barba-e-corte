@@ -26,7 +26,6 @@ export interface BookingData {
   clientEmail: string;
   clientBirthDate: string;
   referralSource: string;
-  // Computed values
   totalDuration: number;
   totalPrice: number;
   totalDeposit: number;
@@ -47,6 +46,8 @@ const initialData: BookingData = {
   totalPrice: 0,
   totalDeposit: 0,
 };
+
+const STEP_LABELS = ["Barbeiro", "Serviços", "Data", "Horário", "Dados", "Confirmar"];
 
 const Agendar = () => {
   const [step, setStep] = useState(1);
@@ -72,7 +73,7 @@ const Agendar = () => {
 
     try {
       const result = await createAppointment.mutateAsync({
-        service_id: bookingData.services[0].id, // Primary service for compatibility
+        service_id: bookingData.services[0].id,
         service_ids: bookingData.services.map(s => s.id),
         barber_id: bookingData.barber.id,
         date: bookingData.date,
@@ -110,7 +111,6 @@ const Agendar = () => {
     }
   };
 
-  // Build a compatible object for BookingSuccess
   const legacyBookingData = {
     service: bookingData.services[0] || null,
     barber: bookingData.barber,
@@ -128,7 +128,6 @@ const Agendar = () => {
         settings={settings ?? null}
         appointmentId={appointmentId ?? undefined}
         onWhatsAppRedirected={handleWhatsAppRedirected}
-        // Pass additional info for multi-service display
         allServices={bookingData.services}
         totalPrice={bookingData.totalPrice}
         totalDuration={bookingData.totalDuration}
@@ -138,39 +137,56 @@ const Agendar = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      {/* Premium Header */}
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
           {step === 1 ? (
             <Link to="/">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="rounded-full">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
-            <Button variant="ghost" size="icon" onClick={prevStep}>
+            <Button variant="ghost" size="icon" onClick={prevStep} className="rounded-full">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
           <div className="flex-1">
-            <h1 className="font-semibold">Agendar horário</h1>
+            <h1 className="font-semibold font-display text-lg tracking-tight">Agendar horário</h1>
             <p className="text-xs text-muted-foreground">
               Passo {step} de {totalSteps}
             </p>
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="h-1 bg-muted">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${(step / totalSteps) * 100}%` }}
-          />
+        {/* Premium step indicators */}
+        <div className="max-w-lg mx-auto px-4 pb-3">
+          <div className="flex items-center gap-1.5">
+            {STEP_LABELS.map((label, i) => {
+              const stepNum = i + 1;
+              const isActive = stepNum === step;
+              const isCompleted = stepNum < step;
+              return (
+                <div key={label} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className={`h-1 w-full rounded-full transition-all duration-300 ${
+                      isCompleted ? "bg-primary" : isActive ? "bg-primary/70" : "bg-muted"
+                    }`}
+                  />
+                  <span className={`text-[9px] font-medium transition-colors ${
+                    isActive ? "text-primary" : isCompleted ? "text-foreground/60" : "text-muted-foreground/50"
+                  }`}>
+                    {label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </header>
 
       {/* Content */}
-      <div className="max-w-lg mx-auto px-4 py-6">
+      <div className="max-w-lg mx-auto px-4 py-8">
         {step === 1 && (
           <StepBarber
             barbers={barbers ?? []}
@@ -178,7 +194,7 @@ const Agendar = () => {
             selected={bookingData.barber}
             anyBarber={bookingData.anyBarber}
             onSelect={(barber, anyBarber) => {
-              updateData({ barber, anyBarber, services: [] }); // Reset services when barber changes
+              updateData({ barber, anyBarber, services: [] });
               nextStep();
             }}
           />

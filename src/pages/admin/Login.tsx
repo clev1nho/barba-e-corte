@@ -36,7 +36,6 @@ const AdminLogin = () => {
 
     toast.success("Login realizado com sucesso!");
     
-    // Redirect based on role
     if (role === "staff") {
       navigate("/admin/agenda");
     } else {
@@ -47,32 +46,33 @@ const AdminLogin = () => {
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors duration-200">
           <ArrowLeft className="w-4 h-4" />
           Voltar ao site
         </Link>
 
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           {settings?.logo_url ? (
             <img 
               src={settings.logo_url} 
               alt={settings.name || "Logo"} 
-              className="h-16 w-auto mx-auto mb-4 object-contain"
+              className="h-20 w-auto mx-auto mb-5 object-contain"
             />
           ) : (
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gold-dark to-primary mb-4">
-              <Scissors className="w-8 h-8 text-primary-foreground" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-gold mb-5 shadow-lg shadow-primary/15">
+              <Scissors className="w-10 h-10 text-primary-foreground" />
             </div>
           )}
-          <h1 className="text-2xl font-bold">Área Administrativa</h1>
-          <p className="text-muted-foreground mt-1">Acesso exclusivo para administradores</p>
+          <h1 className="text-2xl font-bold font-display tracking-tight">Área Administrativa</h1>
+          <div className="premium-divider mt-3" />
+          <p className="text-muted-foreground mt-3 text-sm">Acesso exclusivo para administradores</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
@@ -88,7 +88,7 @@ const AdminLogin = () => {
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="password"
                 type="password"

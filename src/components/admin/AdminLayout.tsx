@@ -23,7 +23,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Filter nav items based on role
   const navItems = useMemo(() => {
     if (isAdminOrOwner) return allNavItems;
     return allNavItems.filter(item => !item.ownerOnly);
@@ -35,7 +34,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       return;
     }
     
-    // Staff trying to access owner-only pages
     if (!loading && isStaff && location.pathname !== "/admin/agenda") {
       navigate("/admin/agenda");
     }
@@ -62,27 +60,28 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <h1 className="font-bold text-lg">{title}</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleBackToSite}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-            >
-              <Home className="w-4 h-4" />
-              <span className="hidden sm:inline">Voltar ao site</span>
-            </button>
+      {/* Premium Header */}
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b border-border/50">
+        <div className="px-4 py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-6 bg-gradient-gold rounded-full" />
+            <h1 className="font-bold text-lg font-display tracking-tight">{title}</h1>
           </div>
+          <button
+            onClick={handleBackToSite}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200 font-medium"
+          >
+            <Home className="w-4 h-4" />
+            <span className="hidden sm:inline">Voltar ao site</span>
+          </button>
         </div>
       </header>
 
       {/* Content */}
-      <main className="pb-24 px-4 py-6">{children}</main>
+      <main className="pb-24 px-4 py-6 max-w-4xl mx-auto">{children}</main>
 
-      {/* Bottom Navigation - scrollable on mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border safe-area-pb">
+      {/* Premium Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/50 safe-area-pb">
         <div className="flex overflow-x-auto scrollbar-hide py-2 px-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
@@ -90,21 +89,25 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors flex-shrink-0 min-w-[72px] ${
-                  isActive ? "text-primary" : "text-muted-foreground"
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all duration-200 flex-shrink-0 min-w-[72px] ${
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="text-[10px] whitespace-nowrap">{item.label}</span>
+                <div className={`p-1 rounded-lg transition-colors ${isActive ? "bg-primary/10" : ""}`}>
+                  <item.icon className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] whitespace-nowrap font-medium">{item.label}</span>
               </Link>
             );
           })}
           <button
             onClick={handleLogout}
-            className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 min-w-[72px]"
+            className="flex flex-col items-center gap-1 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors duration-200 flex-shrink-0 min-w-[72px]"
           >
-            <LogOut className="w-5 h-5" />
-            <span className="text-[10px] whitespace-nowrap">Sair</span>
+            <div className="p-1">
+              <LogOut className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] whitespace-nowrap font-medium">Sair</span>
           </button>
         </div>
       </nav>
