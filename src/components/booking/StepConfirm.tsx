@@ -40,7 +40,6 @@ export function StepConfirm({
   const [paidConfirmed, setPaidConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Use passed totals or compute from single service
   const services = allServices && allServices.length > 0 ? allServices : (bookingData.service ? [bookingData.service] : []);
   const displayPrice = propTotalPrice ?? services.reduce((sum, s) => sum + s.price, 0);
   const displayDuration = propTotalDuration ?? services.reduce((sum, s) => sum + s.duration_minutes, 0);
@@ -75,25 +74,25 @@ export function StepConfirm({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Confirme seu agendamento</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h2 className="text-xl font-bold font-display tracking-tight">Confirme seu agendamento</h2>
+        <p className="text-sm text-muted-foreground mt-1 font-sans">
           Revise os dados antes de confirmar
         </p>
       </div>
 
-      <div className="glass-card rounded-2xl p-5 space-y-4">
+      <div className="glass-card rounded-2xl p-5 space-y-4 border-primary/8">
         {/* Services */}
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 border border-primary/10">
             <Scissors className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
               {services.length > 1 ? "Serviços" : "Serviço"}
             </p>
             <div className="space-y-1">
               {services.map(s => (
-                <p key={s.id} className="font-semibold">{s.name}</p>
+                <p key={s.id} className="font-semibold text-sm">{s.name}</p>
               ))}
             </div>
             {services.length > 1 && (
@@ -106,45 +105,45 @@ export function StepConfirm({
 
         {/* Barber */}
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 border border-primary/10">
             <User className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Barbeiro</p>
-            <p className="font-semibold">{bookingData.barber?.name}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Barbeiro</p>
+            <p className="font-semibold text-sm">{bookingData.barber?.name}</p>
           </div>
         </div>
 
         {/* Date */}
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 border border-primary/10">
             <Calendar className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Data</p>
-            <p className="font-semibold capitalize">{formattedDate}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Data</p>
+            <p className="font-semibold capitalize text-sm">{formattedDate}</p>
           </div>
         </div>
 
         {/* Time */}
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 border border-primary/10">
             <Clock className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Horário</p>
-            <p className="font-semibold">{bookingData.time}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Horário</p>
+            <p className="font-semibold text-sm">{bookingData.time}</p>
           </div>
         </div>
 
         {/* Price */}
-        <div className="flex items-center gap-4 pt-4 border-t border-border">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-4 pt-4 border-t border-border/30">
+          <div className="w-10 h-10 rounded-xl bg-primary/8 flex items-center justify-center flex-shrink-0 border border-primary/10">
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Valor total</p>
-            <p className="text-xl font-bold text-primary">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Valor total</p>
+            <p className="text-2xl font-bold text-primary">
               R$ {displayPrice.toFixed(2).replace(".", ",")}
             </p>
           </div>
@@ -152,9 +151,9 @@ export function StepConfirm({
       </div>
 
       {/* Client info */}
-      <div className="glass-card rounded-2xl p-5">
-        <p className="text-xs text-muted-foreground mb-2">Cliente</p>
-        <p className="font-semibold">{bookingData.clientName}</p>
+      <div className="glass-card rounded-2xl p-5 border-primary/5">
+        <p className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider font-medium">Cliente</p>
+        <p className="font-semibold text-sm">{bookingData.clientName}</p>
         <p className="text-sm text-muted-foreground">
           {bookingData.clientWhatsapp.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3")}
         </p>
@@ -162,21 +161,21 @@ export function StepConfirm({
 
       {/* PIX Deposit Section */}
       {hasDeposit && (
-        <div className="glass-card rounded-2xl p-5 border-2 border-primary/50 space-y-4">
+        <div className="glass-card rounded-2xl p-5 border-2 border-primary/40 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0 border border-primary/20">
               <QrCode className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary">Sinal obrigatório via Pix</h3>
+              <h3 className="font-semibold text-primary text-sm">Sinal obrigatório via Pix</h3>
               <p className="text-sm text-muted-foreground">
                 Para confirmar este agendamento, é necessário pagar o sinal antes.
               </p>
             </div>
           </div>
 
-          <div className="bg-primary/10 rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Valor do sinal:</p>
+          <div className="bg-primary/8 rounded-xl p-4 border border-primary/15">
+            <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wider font-medium">Valor do sinal:</p>
             <p className="text-2xl font-bold text-primary">
               R$ {depositAmount.toFixed(2).replace(".", ",")}
             </p>
@@ -192,7 +191,7 @@ export function StepConfirm({
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 gap-2"
+                  className="flex-1 gap-2 border-primary/20"
                   onClick={handleCopyPix}
                 >
                   {copied ? (
@@ -213,7 +212,7 @@ export function StepConfirm({
                 <p className="text-xs text-muted-foreground">{settings.pix_note}</p>
               )}
 
-              <div className="flex items-start gap-3 pt-2 border-t border-border">
+              <div className="flex items-start gap-3 pt-2 border-t border-border/30">
                 <Checkbox
                   id="paidConfirmed"
                   checked={paidConfirmed}
@@ -226,7 +225,7 @@ export function StepConfirm({
               </div>
             </>
           ) : (
-            <div className="flex items-start gap-3 bg-destructive/10 rounded-xl p-4">
+            <div className="flex items-start gap-3 bg-destructive/8 rounded-xl p-4 border border-destructive/15">
               <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-destructive">Pix ainda não configurado</p>
@@ -243,6 +242,7 @@ export function StepConfirm({
         onClick={onConfirm}
         disabled={confirmDisabled}
         size="lg"
+        variant="gold"
         className="w-full"
       >
         {isLoading ? (

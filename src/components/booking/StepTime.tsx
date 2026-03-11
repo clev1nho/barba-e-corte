@@ -18,7 +18,7 @@ interface StepTimeProps {
   anyBarber: boolean;
   selectedDate: string;
   service: ServiceBase | null;
-  serviceDuration?: number; // Override duration for multi-service
+  serviceDuration?: number;
   selected: string;
   onSelect: (time: string, barber?: Barber) => void;
 }
@@ -59,7 +59,6 @@ export function StepTime({
   selected,
   onSelect,
 }: StepTimeProps) {
-  // Fetch existing appointments for the selected date (only active ones)
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["appointments-for-date", selectedDate],
     queryFn: async () => {
@@ -77,14 +76,12 @@ export function StepTime({
 
   const generateTimeSlots = () => {
     if (!settings || !service) {
-      console.log("Missing settings or service", { settings, service });
       return { slots: [], error: null };
     }
 
     const selectedDayOfWeek = new Date(selectedDate + "T12:00:00").getDay();
     const dayKey = DAY_KEY_MAP[selectedDayOfWeek];
     
-    // Check working hours for this day
     const workingHours = settings.working_hours;
     const daySchedule = workingHours?.[dayKey];
     
@@ -99,7 +96,6 @@ export function StepTime({
     const shopOpen = timeToMinutes(daySchedule.open);
     const shopClose = timeToMinutes(daySchedule.close);
     const interval = settings.slot_interval_minutes || 30;
-    // Use override duration for multi-service, or single service duration
     const totalDuration = serviceDuration || service.duration_minutes;
 
     const barbersToCheck = anyBarber ? barbers : selectedBarber ? [selectedBarber] : [];
@@ -108,7 +104,6 @@ export function StepTime({
       return { slots: [], error: "Nenhum barbeiro disponível." };
     }
 
-    // Filter barbers that work on this day
     const availableBarbers = barbersToCheck.filter((barber) => {
       return barber.days_of_week?.some(
         (day) => DAY_MAP[day.toLowerCase()] === selectedDayOfWeek
@@ -121,19 +116,16 @@ export function StepTime({
 
     const slots: { time: string; barber: Barber }[] = [];
 
-    // For each barber, generate available slots
     for (const barber of availableBarbers) {
       const barberStart = timeToMinutes(barber.start_time || "09:00");
       const barberEnd = timeToMinutes(barber.end_time || "19:00");
 
-      // Use intersection of shop hours and barber hours
       const startTime = Math.max(shopOpen, barberStart);
       const endTime = Math.min(shopClose, barberEnd);
 
       for (let time = startTime; time + totalDuration <= endTime; time += interval) {
         const timeStr = minutesToTime(time);
 
-        // Check if this slot is available (no conflicts)
         const hasConflict = appointments?.some((apt) => {
           if (apt.barber_id !== barber.id) return false;
 
@@ -146,7 +138,6 @@ export function StepTime({
         });
 
         if (!hasConflict) {
-          // Check if we're not in the past
           const now = new Date();
           const slotDate = new Date(selectedDate + "T12:00:00");
           slotDate.setHours(Math.floor(time / 60), time % 60, 0, 0);
@@ -158,7 +149,6 @@ export function StepTime({
       }
     }
 
-    // Remove duplicate times if anyBarber (keep first available)
     if (anyBarber) {
       const uniqueSlots = new Map<string, { time: string; barber: Barber }>();
       slots.forEach((slot) => {
@@ -185,10 +175,10 @@ export function StepTime({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold mb-6">Escolha o horário</h2>
+        <h2 className="text-xl font-bold mb-6 font-display tracking-tight">Escolha o horário</h2>
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-14 bg-muted rounded-xl animate-pulse" />
+            <div key={i} className="h-14 bg-muted/30 rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -198,8 +188,8 @@ export function StepTime({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Escolha o horário</h2>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h2 className="text-xl font-bold font-display tracking-tight">Escolha o horário</h2>
+        <p className="text-sm text-muted-foreground mt-1 font-sans">
           {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
             weekday: "long",
             day: "numeric",
@@ -209,16 +199,16 @@ export function StepTime({
       </div>
 
       {slotsError ? (
-        <div className="text-center py-12">
-          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+        <div className="text-center py-12 glass-card rounded-2xl">
+          <AlertCircle className="w-12 h-12 text-amber-500/70 mx-auto mb-4" />
           <p className="text-muted-foreground">{slotsError}</p>
           <p className="text-sm text-muted-foreground mt-2">
             Tente escolher outra data.
           </p>
         </div>
       ) : timeSlots.length === 0 ? (
-        <div className="text-center py-12">
-          <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <div className="text-center py-12 glass-card rounded-2xl">
+          <Clock className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
           <p className="text-muted-foreground">
             Nenhum horário disponível para esta data.
           </p>
@@ -232,10 +222,10 @@ export function StepTime({
             <button
               key={`${time}-${barber.id}`}
               onClick={() => onSelect(time, anyBarber ? barber : undefined)}
-              className={`h-14 rounded-xl font-semibold transition-all ${
+              className={`h-14 rounded-xl font-semibold transition-all duration-220 text-sm ${
                 selected === time
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80 text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                  : "bg-muted/40 hover:bg-muted/60 text-foreground border border-border/30 hover:border-primary/15"
               }`}
             >
               {selected === time ? (
