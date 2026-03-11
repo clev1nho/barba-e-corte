@@ -5,13 +5,12 @@ import { useShopSettings } from "@/hooks/useShopSettings";
 export function Footer() {
   const { data: settings } = useShopSettings();
 
-  // Use footer_text from admin if available, otherwise don't show
   const footerText = settings?.footer_text?.trim();
 
   return (
-    <footer className="py-8 px-4 border-t border-border">
+    <footer className="py-10 px-4 border-t border-border/50">
       <div className="max-w-lg mx-auto">
-        <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="flex items-center justify-center gap-2.5 mb-5">
           {settings?.logo_url ? (
             <img 
               src={settings.logo_url} 
@@ -23,23 +22,23 @@ export function Footer() {
               <Scissors className="w-4 h-4 text-primary-foreground" />
             </div>
           )}
-          <span className="font-semibold">{settings?.name || "Care For Men"}</span>
+          <span className="font-semibold font-display tracking-tight">{settings?.name || "Care For Men"}</span>
         </div>
 
-        <div className="flex justify-center gap-6 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary transition-colors">
+        <div className="flex justify-center gap-8 text-sm text-muted-foreground">
+          <Link to="/" className="hover:text-primary transition-colors duration-200">
             Início
           </Link>
-          <Link to="/agendar" className="hover:text-primary transition-colors">
+          <Link to="/agendar" className="hover:text-primary transition-colors duration-200">
             Agendar
           </Link>
-          <Link to="/admin/login" className="hover:text-primary transition-colors">
+          <Link to="/admin/login" className="hover:text-primary transition-colors duration-200">
             Admin
           </Link>
         </div>
 
         {footerText && footerText.length > 0 && (
-          <p className="text-center text-xs text-muted-foreground mt-6">
+          <p className="text-center text-xs text-muted-foreground/70 mt-8">
             {footerText}
           </p>
         )}
