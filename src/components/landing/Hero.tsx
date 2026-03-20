@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MessageCircle, Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ShopSettings } from "@/hooks/useShopSettings";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/i18n/LanguageSelector";
 
 interface HeroProps {
   settings: ShopSettings | null;
@@ -11,6 +13,7 @@ interface HeroProps {
 
 export function Hero({ settings, isLoading }: HeroProps) {
   const [logoError, setLogoError] = useState(false);
+  const { t, translateShopField } = useLanguage();
 
   if (isLoading) {
     return (
@@ -26,8 +29,17 @@ export function Hero({ settings, isLoading }: HeroProps) {
 
   const hasCustomLogo = settings?.logo_url && !logoError;
 
+  const subtitle = translateShopField("subtitle", settings?.subtitle) || t.hero_default_subtitle;
+  const heroSecondaryText = settings?.hero_secondary_text;
+  const openingHours = translateShopField("opening_hours", settings?.opening_hours);
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-20 overflow-hidden">
+      {/* Language selector */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSelector />
+      </div>
+
       {/* Background image */}
       <div 
         className="absolute inset-0 bg-cover bg-no-repeat"
@@ -59,7 +71,7 @@ export function Hero({ settings, isLoading }: HeroProps) {
 
         {/* Title */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 animate-fade-in tracking-tight">
-          {settings?.name || "Barbearia Exclusiva"}
+          {settings?.name || t.hero_default_name}
         </h1>
 
         {/* Decorative line */}
@@ -67,13 +79,13 @@ export function Hero({ settings, isLoading }: HeroProps) {
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-foreground/90 font-medium mb-3 animate-fade-in font-sans" style={{ animationDelay: "0.1s" }}>
-          {settings?.subtitle || "Cortes de alto nível e atendimento profissional"}
+          {subtitle}
         </p>
 
         {/* Description */}
-        {settings?.hero_secondary_text && settings.hero_secondary_text.trim().length > 0 && (
+        {heroSecondaryText && heroSecondaryText.trim().length > 0 && (
           <p className="text-muted-foreground mb-8 animate-fade-in font-sans text-sm md:text-base" style={{ animationDelay: "0.2s" }}>
-            {settings.hero_secondary_text}
+            {heroSecondaryText}
           </p>
         )}
 
@@ -82,24 +94,24 @@ export function Hero({ settings, isLoading }: HeroProps) {
           <Link to="/agendar" className="w-full">
             <Button variant="hero" size="xl" className="w-full">
               <Calendar className="w-5 h-5" />
-              Agendar horário
+              {t.hero_book_cta}
             </Button>
           </Link>
 
           <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="w-full">
             <Button variant="outline" size="lg" className="w-full border-primary/25 text-foreground hover:bg-primary/10 hover:border-primary/40">
               <MessageCircle className="w-5 h-5" />
-              Chamar no WhatsApp
+              {t.hero_whatsapp_cta}
             </Button>
           </a>
         </div>
 
         {/* Opening hours card */}
-        {settings?.opening_hours && settings.opening_hours.trim().length > 0 && (
+        {openingHours && openingHours.trim().length > 0 && (
           <div className="mt-12 glass-card rounded-2xl p-5 animate-slide-up max-w-xs mx-auto" style={{ animationDelay: "0.4s" }}>
-            <p className="text-xs text-muted-foreground mb-1.5 uppercase tracking-widest font-sans">Horário de funcionamento</p>
+            <p className="text-xs text-muted-foreground mb-1.5 uppercase tracking-widest font-sans">{t.hero_opening_hours_label}</p>
             <p className="text-lg font-semibold text-primary font-sans">
-              {settings.opening_hours}
+              {openingHours}
             </p>
           </div>
         )}
