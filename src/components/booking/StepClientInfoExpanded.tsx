@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Phone, Mail, Calendar } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface StepClientInfoExpandedProps {
   clientName: string;
@@ -26,10 +27,9 @@ const referralOptions = [
   { value: "google", label: "Google" },
   { value: "tiktok", label: "TikTok" },
   { value: "twitter", label: "Twitter" },
-  { value: "outros", label: "Outros" },
+  { value: "outros", label: "outros_placeholder" }, // will be replaced
 ];
 
-// Convert DD/MM/YYYY to YYYY-MM-DD for database
 function toISODate(dateStr: string): string {
   const parts = dateStr.split("/");
   if (parts.length !== 3) return "";
@@ -37,64 +37,12 @@ function toISODate(dateStr: string): string {
   return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
-// Convert YYYY-MM-DD to DD/MM/YYYY for display
 function fromISODate(dateStr: string): string {
   if (!dateStr) return "";
   const parts = dateStr.split("-");
   if (parts.length !== 3) return dateStr;
   const [year, month, day] = parts;
   return `${day}/${month}/${year}`;
-}
-
-// Validate DD/MM/YYYY format
-function isValidDate(dateStr: string): { valid: boolean; error?: string } {
-  if (dateStr.length !== 10) {
-    return { valid: false, error: "Data incompleta" };
-  }
-  
-  const parts = dateStr.split("/");
-  if (parts.length !== 3) {
-    return { valid: false, error: "Formato inválido" };
-  }
-  
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const year = parseInt(parts[2], 10);
-  
-  if (isNaN(day) || isNaN(month) || isNaN(year)) {
-    return { valid: false, error: "Data inválida" };
-  }
-  
-  if (month < 1 || month > 12) {
-    return { valid: false, error: "Mês inválido (1-12)" };
-  }
-  
-  if (day < 1 || day > 31) {
-    return { valid: false, error: "Dia inválido" };
-  }
-  
-  // Check days per month
-  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  // Leap year check
-  if (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
-    daysInMonth[1] = 29;
-  }
-  
-  if (day > daysInMonth[month - 1]) {
-    return { valid: false, error: `${month === 2 ? "Fevereiro" : "Este mês"} não tem ${day} dias` };
-  }
-  
-  if (year < 1900 || year > new Date().getFullYear()) {
-    return { valid: false, error: "Ano inválido" };
-  }
-  
-  // Check if date is in the future
-  const date = new Date(year, month - 1, day);
-  if (date > new Date()) {
-    return { valid: false, error: "Data não pode ser futura" };
-  }
-  
-  return { valid: true };
 }
 
 export function StepClientInfoExpanded({ 
@@ -111,6 +59,7 @@ export function StepClientInfoExpanded({
   const [birthDate, setBirthDate] = useState(fromISODate(clientBirthDate));
   const [referral, setReferral] = useState(referralSource);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { t } = useLanguage();
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -123,10 +72,7 @@ export function StepClientInfoExpanded({
   };
 
   const formatBirthDate = (value: string) => {
-    // Remove non-digits
     const numbers = value.replace(/\D/g, "");
-    
-    // Auto-insert slashes
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
     return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
@@ -139,8 +85,6 @@ export function StepClientInfoExpanded({
   const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatBirthDate(e.target.value);
     setBirthDate(formatted);
-    
-    // Clear error on change
     if (errors.birthDate) {
       setErrors(prev => ({ ...prev, birthDate: "" }));
     }
@@ -150,35 +94,67 @@ export function StepClientInfoExpanded({
     const newErrors: Record<string, string> = {};
 
     if (!name.trim()) {
-      newErrors.name = "Nome é obrigatório";
+      newErrors.name = t.val_name_required;
     } else if (name.trim().length < 3) {
-      newErrors.name = "Nome deve ter pelo menos 3 caracteres";
+      newErrors.name = t.val_name_min;
     }
 
     const phoneNumbers = whatsapp.replace(/\D/g, "");
     if (!phoneNumbers) {
-      newErrors.whatsapp = "WhatsApp é obrigatório";
+      newErrors.whatsapp = t.val_whatsapp_required;
     } else if (phoneNumbers.length < 10) {
-      newErrors.whatsapp = "WhatsApp inválido";
+      newErrors.whatsapp = t.val_whatsapp_invalid;
     }
 
     if (!email.trim()) {
-      newErrors.email = "E-mail é obrigatório";
+      newErrors.email = t.val_email_required;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "E-mail inválido";
+      newErrors.email = t.val_email_invalid;
     }
 
     if (!birthDate) {
-      newErrors.birthDate = "Data de nascimento é obrigatória";
+      newErrors.birthDate = t.val_birthdate_required;
     } else {
-      const dateValidation = isValidDate(birthDate);
-      if (!dateValidation.valid) {
-        newErrors.birthDate = dateValidation.error || "Data inválida";
+      // Validate DD/MM/YYYY
+      if (birthDate.length !== 10) {
+        newErrors.birthDate = t.val_birthdate_incomplete;
+      } else {
+        const parts = birthDate.split("/");
+        if (parts.length !== 3) {
+          newErrors.birthDate = t.val_birthdate_invalid_format;
+        } else {
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10);
+          const year = parseInt(parts[2], 10);
+          
+          if (isNaN(day) || isNaN(month) || isNaN(year)) {
+            newErrors.birthDate = t.val_birthdate_invalid;
+          } else if (month < 1 || month > 12) {
+            newErrors.birthDate = t.val_birthdate_month;
+          } else if (day < 1 || day > 31) {
+            newErrors.birthDate = t.val_birthdate_day;
+          } else {
+            const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)) {
+              daysInMonth[1] = 29;
+            }
+            if (day > daysInMonth[month - 1]) {
+              newErrors.birthDate = t.val_birthdate_day_overflow;
+            } else if (year < 1900 || year > new Date().getFullYear()) {
+              newErrors.birthDate = t.val_birthdate_year;
+            } else {
+              const date = new Date(year, month - 1, day);
+              if (date > new Date()) {
+                newErrors.birthDate = t.val_birthdate_future;
+              }
+            }
+          }
+        }
       }
     }
 
     if (!referral) {
-      newErrors.referral = "Por favor, selecione como conheceu a barbearia";
+      newErrors.referral = t.val_referral_required;
     }
 
     setErrors(newErrors);
@@ -192,7 +168,7 @@ export function StepClientInfoExpanded({
         name: name.trim(),
         whatsapp: whatsapp.replace(/\D/g, ""),
         email: email.trim(),
-        birthDate: toISODate(birthDate), // Convert to ISO for database
+        birthDate: toISODate(birthDate),
         referralSource: referral,
       });
     }
@@ -201,16 +177,13 @@ export function StepClientInfoExpanded({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Seus dados</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Para confirmar seu agendamento
-        </p>
+        <h2 className="text-xl font-bold">{t.step_client_title}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t.step_client_subtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Nome */}
         <div className="space-y-2">
-          <Label htmlFor="name">Nome completo *</Label>
+          <Label htmlFor="name">{t.step_client_name_label} *</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -218,18 +191,15 @@ export function StepClientInfoExpanded({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome completo"
+              placeholder={t.step_client_name_placeholder}
               className="pl-10 h-12"
             />
           </div>
-          {errors.name && (
-            <p className="text-sm text-destructive">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
         </div>
 
-        {/* WhatsApp */}
         <div className="space-y-2">
-          <Label htmlFor="whatsapp">WhatsApp *</Label>
+          <Label htmlFor="whatsapp">{t.step_client_whatsapp_label} *</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -237,19 +207,16 @@ export function StepClientInfoExpanded({
               type="tel"
               value={whatsapp}
               onChange={handleWhatsappChange}
-              placeholder="(00) 00000-0000"
+              placeholder={t.step_client_whatsapp_placeholder}
               className="pl-10 h-12"
               maxLength={16}
             />
           </div>
-          {errors.whatsapp && (
-            <p className="text-sm text-destructive">{errors.whatsapp}</p>
-          )}
+          {errors.whatsapp && <p className="text-sm text-destructive">{errors.whatsapp}</p>}
         </div>
 
-        {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email">E-mail *</Label>
+          <Label htmlFor="email">{t.step_client_email_label} *</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -257,18 +224,15 @@ export function StepClientInfoExpanded({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
+              placeholder={t.step_client_email_placeholder}
               className="pl-10 h-12"
             />
           </div>
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email}</p>
-          )}
+          {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
         </div>
 
-        {/* Data de nascimento - Masked input */}
         <div className="space-y-2">
-          <Label htmlFor="birthDate">Data de nascimento *</Label>
+          <Label htmlFor="birthDate">{t.step_client_birthdate_label} *</Label>
           <div className="relative">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -277,38 +241,33 @@ export function StepClientInfoExpanded({
               inputMode="numeric"
               value={birthDate}
               onChange={handleBirthDateChange}
-              placeholder="DD/MM/AAAA"
+              placeholder={t.step_client_birthdate_placeholder}
               className="pl-10 h-12"
               maxLength={10}
             />
           </div>
-          {errors.birthDate && (
-            <p className="text-sm text-destructive">{errors.birthDate}</p>
-          )}
+          {errors.birthDate && <p className="text-sm text-destructive">{errors.birthDate}</p>}
         </div>
 
-        {/* Como conheceu */}
         <div className="space-y-2">
-          <Label htmlFor="referral">Como conheceu a barbearia? *</Label>
+          <Label htmlFor="referral">{t.step_client_referral_label} *</Label>
           <Select value={referral} onValueChange={setReferral}>
             <SelectTrigger className="h-12">
-              <SelectValue placeholder="Selecione uma opção" />
+              <SelectValue placeholder={t.step_client_referral_placeholder} />
             </SelectTrigger>
             <SelectContent>
               {referralOptions.map(option => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {option.value === "outros" ? t.referral_outros : option.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {errors.referral && (
-            <p className="text-sm text-destructive">{errors.referral}</p>
-          )}
+          {errors.referral && <p className="text-sm text-destructive">{errors.referral}</p>}
         </div>
 
         <Button type="submit" size="lg" className="w-full mt-6">
-          Continuar
+          {t.step_client_continue}
         </Button>
       </form>
     </div>

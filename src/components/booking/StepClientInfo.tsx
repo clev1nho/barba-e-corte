@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Phone } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface StepClientInfoProps {
   clientName: string;
@@ -14,6 +15,7 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
   const [name, setName] = useState(clientName);
   const [whatsapp, setWhatsapp] = useState(clientWhatsapp);
   const [errors, setErrors] = useState<{ name?: string; whatsapp?: string }>({});
+  const { t } = useLanguage();
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");
@@ -33,16 +35,16 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
     const newErrors: { name?: string; whatsapp?: string } = {};
 
     if (!name.trim()) {
-      newErrors.name = "Nome é obrigatório";
+      newErrors.name = t.val_name_required;
     } else if (name.trim().length < 3) {
-      newErrors.name = "Nome deve ter pelo menos 3 caracteres";
+      newErrors.name = t.val_name_min;
     }
 
     const phoneNumbers = whatsapp.replace(/\D/g, "");
     if (!phoneNumbers) {
-      newErrors.whatsapp = "WhatsApp é obrigatório";
+      newErrors.whatsapp = t.val_whatsapp_required;
     } else if (phoneNumbers.length < 10) {
-      newErrors.whatsapp = "WhatsApp inválido";
+      newErrors.whatsapp = t.val_whatsapp_invalid;
     }
 
     setErrors(newErrors);
@@ -59,15 +61,13 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Seus dados</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Para confirmar seu agendamento
-        </p>
+        <h2 className="text-xl font-bold">{t.step_client_title}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t.step_client_subtitle}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Nome completo</Label>
+          <Label htmlFor="name">{t.step_client_name_label}</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -75,7 +75,7 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Seu nome"
+              placeholder={t.step_client_name_placeholder}
               className="pl-10 h-12"
             />
           </div>
@@ -85,7 +85,7 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="whatsapp">WhatsApp</Label>
+          <Label htmlFor="whatsapp">{t.step_client_whatsapp_label}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -93,7 +93,7 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
               type="tel"
               value={whatsapp}
               onChange={handleWhatsappChange}
-              placeholder="(00) 00000-0000"
+              placeholder={t.step_client_whatsapp_placeholder}
               className="pl-10 h-12"
               maxLength={16}
             />
@@ -104,7 +104,7 @@ export function StepClientInfo({ clientName, clientWhatsapp, onSubmit }: StepCli
         </div>
 
         <Button type="submit" size="lg" className="w-full mt-6">
-          Continuar
+          {t.step_client_continue}
         </Button>
       </form>
     </div>
