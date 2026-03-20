@@ -3,6 +3,7 @@ import { Check, ChevronDown, ChevronUp, Clock, DollarSign, AlertCircle } from "l
 import { useServicesWithCategories, ServiceWithCategory, groupServicesByCategory } from "@/hooks/useServicesWithCategories";
 import { useServiceIdsForBarber } from "@/hooks/useBarberServices";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface StepServiceMultiProps {
   selectedServices: ServiceWithCategory[];
@@ -15,16 +16,15 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
   const { data: services, isLoading } = useServicesWithCategories();
   const { data: barberServiceIds } = useServiceIdsForBarber(barberId);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const { t, translateService } = useLanguage();
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
   };
 
-  // Filter services by barber's allowed services
   const availableServices = useMemo(() => {
     if (!services) return [];
     if (!barberId || !barberServiceIds || barberServiceIds.length === 0) {
-      // If no barber selected or barber has all services, show all
       return services;
     }
     return services.filter(s => barberServiceIds.includes(s.id));
@@ -46,7 +46,7 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold mb-6">Escolha os serviços</h2>
+        <h2 className="text-xl font-bold mb-6">{t.step_service_multi_title}</h2>
         {[1, 2, 3].map((i) => (
           <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
             <div className="h-5 bg-muted rounded w-1/3 mb-2" />
@@ -63,20 +63,17 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-bold">Escolha os serviços</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Você pode selecionar múltiplos serviços
-        </p>
+        <h2 className="text-xl font-bold">{t.step_service_multi_title}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t.step_service_multi_subtitle}</p>
       </div>
 
-      {/* Summary card */}
       {selectedServices.length > 0 && (
         <div className="glass-card rounded-xl p-4 border-2 border-primary/30 space-y-2">
-          <h3 className="font-semibold text-sm">Resumo da seleção</h3>
+          <h3 className="font-semibold text-sm">{t.step_service_multi_summary}</h3>
           <div className="flex flex-wrap gap-4 text-sm">
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              {totalDuration} min
+              {totalDuration} {t.min_unit}
             </span>
             <span className="flex items-center gap-1 text-primary font-semibold">
               <DollarSign className="w-4 h-4" />
@@ -84,14 +81,14 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
             </span>
             {totalDeposit > 0 && (
               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                Sinal: R$ {totalDeposit.toFixed(2).replace(".", ",")}
+                {t.step_service_multi_deposit}: R$ {totalDeposit.toFixed(2).replace(".", ",")}
               </span>
             )}
           </div>
           <div className="flex flex-wrap gap-1 pt-1">
             {selectedServices.map(s => (
               <span key={s.id} className="text-xs bg-muted px-2 py-1 rounded">
-                {s.name}
+                {translateService(s.id, s.name)}
               </span>
             ))}
           </div>
@@ -101,7 +98,7 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
       {barberId && barberServiceIds && barberServiceIds.length > 0 && barberServiceIds.length !== services?.length && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>Mostrando apenas serviços disponíveis para este barbeiro</span>
+          <span>{t.step_service_multi_barber_filter}</span>
         </div>
       )}
 
@@ -160,7 +157,6 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
         );
       })}
 
-      {/* Continue Button - Always visible, disabled if no service selected */}
       <Button 
         onClick={onContinue}
         disabled={selectedServices.length === 0}
@@ -168,8 +164,8 @@ export function StepServiceMulti({ selectedServices, onSelect, onContinue, barbe
         className="w-full mt-4"
       >
         {selectedServices.length === 0 
-          ? "Selecione pelo menos 1 serviço" 
-          : `Continuar com ${selectedServices.length} serviço(s)`}
+          ? t.step_service_multi_select_min 
+          : t.step_service_multi_continue.replace("{n}", String(selectedServices.length))}
       </Button>
     </div>
   );
@@ -184,6 +180,8 @@ function ServiceItemMulti({
   isSelected: boolean; 
   onToggle: (s: ServiceWithCategory) => void;
 }) {
+  const { t, translateService } = useLanguage();
+
   return (
     <button
       onClick={() => onToggle(service)}
@@ -193,15 +191,15 @@ function ServiceItemMulti({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1">
-          <h3 className="font-medium">{service.name}</h3>
+          <h3 className="font-medium">{translateService(service.id, service.name)}</h3>
           <div className="flex items-center gap-4 mt-1 text-sm">
-            <span className="text-muted-foreground">{service.duration_minutes} min</span>
+            <span className="text-muted-foreground">{service.duration_minutes} {t.min_unit}</span>
             <span className="text-primary font-semibold">
               R$ {service.price.toFixed(2).replace(".", ",")}
             </span>
             {(service.deposit_amount ?? 0) > 0 && (
               <span className="text-xs text-muted-foreground">
-                Sinal: R$ {(service.deposit_amount ?? 0).toFixed(2).replace(".", ",")}
+                {t.step_service_multi_deposit}: R$ {(service.deposit_amount ?? 0).toFixed(2).replace(".", ",")}
               </span>
             )}
           </div>

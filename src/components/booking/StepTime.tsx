@@ -3,6 +3,7 @@ import { Check, Clock, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShopSettings, WorkingHours } from "@/hooks/useShopSettings";
 import { Barber } from "@/hooks/useBarbers";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ServiceBase {
   id: string;
@@ -18,7 +19,7 @@ interface StepTimeProps {
   anyBarber: boolean;
   selectedDate: string;
   service: ServiceBase | null;
-  serviceDuration?: number; // Override duration for multi-service
+  serviceDuration?: number;
   selected: string;
   onSelect: (time: string, barber?: Barber) => void;
 }
@@ -59,7 +60,8 @@ export function StepTime({
   selected,
   onSelect,
 }: StepTimeProps) {
-  // Fetch existing appointments for the selected date (only active ones)
+  const { t, lang } = useLanguage();
+
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["appointments-for-date", selectedDate],
     queryFn: async () => {
@@ -84,31 +86,28 @@ export function StepTime({
     const selectedDayOfWeek = new Date(selectedDate + "T12:00:00").getDay();
     const dayKey = DAY_KEY_MAP[selectedDayOfWeek];
     
-    // Check working hours for this day
     const workingHours = settings.working_hours;
     const daySchedule = workingHours?.[dayKey];
     
     if (!daySchedule || daySchedule.closed) {
-      return { slots: [], error: "A barbearia está fechada neste dia." };
+      return { slots: [], error: t.step_time_closed };
     }
 
     if (!daySchedule.open || !daySchedule.close) {
-      return { slots: [], error: "Horário de funcionamento não configurado para este dia." };
+      return { slots: [], error: t.step_time_not_configured };
     }
 
     const shopOpen = timeToMinutes(daySchedule.open);
     const shopClose = timeToMinutes(daySchedule.close);
     const interval = settings.slot_interval_minutes || 30;
-    // Use override duration for multi-service, or single service duration
     const totalDuration = serviceDuration || service.duration_minutes;
 
     const barbersToCheck = anyBarber ? barbers : selectedBarber ? [selectedBarber] : [];
     
     if (barbersToCheck.length === 0) {
-      return { slots: [], error: "Nenhum barbeiro disponível." };
+      return { slots: [], error: t.step_time_no_barber };
     }
 
-    // Filter barbers that work on this day
     const availableBarbers = barbersToCheck.filter((barber) => {
       return barber.days_of_week?.some(
         (day) => DAY_MAP[day.toLowerCase()] === selectedDayOfWeek
@@ -116,24 +115,21 @@ export function StepTime({
     });
 
     if (availableBarbers.length === 0) {
-      return { slots: [], error: "Nenhum barbeiro trabalha neste dia." };
+      return { slots: [], error: t.step_time_no_barber_day };
     }
 
     const slots: { time: string; barber: Barber }[] = [];
 
-    // For each barber, generate available slots
     for (const barber of availableBarbers) {
       const barberStart = timeToMinutes(barber.start_time || "09:00");
       const barberEnd = timeToMinutes(barber.end_time || "19:00");
 
-      // Use intersection of shop hours and barber hours
       const startTime = Math.max(shopOpen, barberStart);
       const endTime = Math.min(shopClose, barberEnd);
 
       for (let time = startTime; time + totalDuration <= endTime; time += interval) {
         const timeStr = minutesToTime(time);
 
-        // Check if this slot is available (no conflicts)
         const hasConflict = appointments?.some((apt) => {
           if (apt.barber_id !== barber.id) return false;
 
@@ -146,7 +142,6 @@ export function StepTime({
         });
 
         if (!hasConflict) {
-          // Check if we're not in the past
           const now = new Date();
           const slotDate = new Date(selectedDate + "T12:00:00");
           slotDate.setHours(Math.floor(time / 60), time % 60, 0, 0);
@@ -158,7 +153,6 @@ export function StepTime({
       }
     }
 
-    // Remove duplicate times if anyBarber (keep first available)
     if (anyBarber) {
       const uniqueSlots = new Map<string, { time: string; barber: Barber }>();
       slots.forEach((slot) => {
@@ -182,10 +176,12 @@ export function StepTime({
 
   const { slots: timeSlots, error: slotsError } = generateTimeSlots();
 
+  const dateLocale = lang === "en" ? "en-US" : lang === "es" ? "es-ES" : "pt-BR";
+
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold mb-6">Escolha o horário</h2>
+        <h2 className="text-xl font-bold mb-6">{t.step_time_title}</h2>
         <div className="grid grid-cols-3 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-14 bg-muted rounded-xl animate-pulse" />
@@ -198,9 +194,9 @@ export function StepTime({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Escolha o horário</h2>
+        <h2 className="text-xl font-bold">{t.step_time_title}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR", {
+          {new Date(selectedDate + "T12:00:00").toLocaleDateString(dateLocale, {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -212,19 +208,13 @@ export function StepTime({
         <div className="text-center py-12">
           <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
           <p className="text-muted-foreground">{slotsError}</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Tente escolher outra data.
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">{t.step_time_try_another}</p>
         </div>
       ) : timeSlots.length === 0 ? (
         <div className="text-center py-12">
           <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            Nenhum horário disponível para esta data.
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Todos os horários já estão ocupados ou já passaram. Tente outra data.
-          </p>
+          <p className="text-muted-foreground">{t.step_time_no_slots}</p>
+          <p className="text-sm text-muted-foreground mt-2">{t.step_time_no_slots_hint}</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-3">

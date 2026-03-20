@@ -1,9 +1,11 @@
 import { Scissors } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useShopSettings } from "@/hooks/useShopSettings";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 export function Footer() {
   const { data: settings } = useShopSettings();
+  const { t } = useLanguage();
 
   const footerText = settings?.footer_text?.trim();
 
@@ -27,13 +29,13 @@ export function Footer() {
 
         <div className="flex justify-center gap-8 text-sm text-muted-foreground">
           <Link to="/" className="hover:text-primary transition-colors duration-200">
-            Início
+            {t.footer_home}
           </Link>
           <Link to="/agendar" className="hover:text-primary transition-colors duration-200">
-            Agendar
+            {t.footer_book}
           </Link>
           <Link to="/admin/login" className="hover:text-primary transition-colors duration-200">
-            Admin
+            {t.footer_admin}
           </Link>
         </div>
 

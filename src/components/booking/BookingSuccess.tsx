@@ -7,6 +7,7 @@ import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
 import { Barber } from "@/hooks/useBarbers";
 import { normalizeWhatsAppNumber, buildWhatsAppUrl, isMobileDevice } from "@/lib/whatsapp";
 import { toast } from "sonner";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface LegacyBookingData {
   service: ServiceWithCategory | null;
@@ -38,12 +39,15 @@ export function BookingSuccess({
   totalDuration: propTotalDuration
 }: BookingSuccessProps) {
   const [popupBlockedUrl, setPopupBlockedUrl] = useState<string | null>(null);
+  const { t, lang, translateService } = useLanguage();
 
   const services = allServices && allServices.length > 0 ? allServices : (bookingData.service ? [bookingData.service] : []);
   const displayPrice = propTotalPrice ?? services.reduce((sum, s) => sum + s.price, 0);
 
+  const dateLocale = lang === "en" ? "en-US" : lang === "es" ? "es-ES" : "pt-BR";
+
   const formattedDate = bookingData.date
-    ? new Date(bookingData.date + "T12:00:00").toLocaleDateString("pt-BR", {
+    ? new Date(bookingData.date + "T12:00:00").toLocaleDateString(dateLocale, {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -58,13 +62,12 @@ export function BookingSuccess({
       })
     : "";
 
-  // Normalize phone number using the helper
   const normalizedPhone = normalizeWhatsAppNumber(settings?.whatsapp);
   const hasWhatsApp = !!settings?.whatsapp?.trim();
 
   const servicesText = services.map(s => s.name).join(", ");
   
-  // Build message (NOT encoded yet - the helper will encode it)
+  // WhatsApp message always in PT (business communication)
   const whatsappMessage = 
     `👤 Nome: ${bookingData.clientName}\n` +
     `✂️ Serviço${services.length > 1 ? 's' : ''}: ${servicesText}\n` +
@@ -78,12 +81,12 @@ export function BookingSuccess({
     setPopupBlockedUrl(null);
 
     if (!settings?.whatsapp || !settings.whatsapp.trim()) {
-      toast.error("WhatsApp da barbearia não configurado no painel.");
+      toast.error(t.success_whatsapp_not_configured);
       return;
     }
     
     if (!normalizedPhone) {
-      toast.error("Número do WhatsApp inválido. Use DDI+DDD+número.");
+      toast.error(t.success_whatsapp_not_configured);
       return;
     }
     
@@ -96,7 +99,7 @@ export function BookingSuccess({
         onWhatsAppRedirected?.();
       } catch (error) {
         console.error("Erro ao abrir WhatsApp no mobile:", error);
-        toast.error("Não foi possível abrir o WhatsApp. Tente novamente.");
+        toast.error(t.success_whatsapp_not_configured);
       }
       return;
     }
@@ -105,7 +108,7 @@ export function BookingSuccess({
 
     if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
       setPopupBlockedUrl(url);
-      toast.error("Seu navegador bloqueou a abertura do WhatsApp. Use o botão abaixo para abrir manualmente.");
+      toast.error(t.success_popup_blocked);
       return;
     }
 
@@ -122,13 +125,13 @@ export function BookingSuccess({
         </div>
 
         <h1 className="text-2xl font-bold mb-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          Agendamento realizado!
+          {t.success_title}
         </h1>
         <p className="text-muted-foreground mb-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-          Seu horário está confirmado
+          {t.success_subtitle}
         </p>
         <p className="text-sm text-muted-foreground mb-8 animate-fade-in" style={{ animationDelay: "0.25s" }}>
-          Use o botão abaixo para confirmar no WhatsApp.
+          {t.success_whatsapp_hint}
         </p>
 
         <div className="glass-card rounded-2xl p-5 mb-8 text-left animate-slide-up" style={{ animationDelay: "0.3s" }}>
@@ -136,7 +139,7 @@ export function BookingSuccess({
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
               <div>
-                <p className="text-xs text-muted-foreground">Data e horário</p>
+                <p className="text-xs text-muted-foreground">{t.success_date_time}</p>
                 <p className="font-semibold capitalize">
                   {formattedDate} às {bookingData.time}
                 </p>
@@ -149,10 +152,10 @@ export function BookingSuccess({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {services.length > 1 ? "Serviços" : "Serviço"}
+                  {services.length > 1 ? t.success_services : t.success_service}
                 </p>
                 {services.map(s => (
-                  <p key={s.id} className="font-semibold">{s.name}</p>
+                  <p key={s.id} className="font-semibold">{translateService(s.id, s.name)}</p>
                 ))}
               </div>
             </div>
@@ -162,7 +165,7 @@ export function BookingSuccess({
                 💈
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Barbeiro</p>
+                <p className="text-xs text-muted-foreground">{t.success_barber}</p>
                 <p className="font-semibold">{bookingData.barber?.name}</p>
               </div>
             </div>
@@ -173,14 +176,14 @@ export function BookingSuccess({
                   🔖
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Código</p>
+                  <p className="text-xs text-muted-foreground">{t.success_code}</p>
                   <p className="font-semibold font-mono">{appointmentId.slice(0, 8).toUpperCase()}</p>
                 </div>
               </div>
             )}
 
             <div className="pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground">Valor total</p>
+              <p className="text-xs text-muted-foreground">{t.success_total}</p>
               <p className="text-xl font-bold text-primary">
                 R$ {displayPrice.toFixed(2).replace(".", ",")}
               </p>
@@ -197,25 +200,25 @@ export function BookingSuccess({
               onClick={handleOpenWhatsApp}
             >
               <MessageCircle className="w-5 h-5" />
-              Confirmar no WhatsApp
+              {t.success_whatsapp_button}
             </Button>
           ) : (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>WhatsApp da barbearia não configurado no painel.</span>
+              <span>{t.success_whatsapp_not_configured}</span>
             </div>
           )}
 
           {popupBlockedUrl && (
             <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted text-sm text-muted-foreground border border-border">
-              <p>Seu navegador bloqueou a abertura automática do WhatsApp.</p>
+              <p>{t.success_popup_blocked}</p>
               <a
                 href={popupBlockedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
               >
-                Abrir WhatsApp Web
+                {t.success_popup_open}
               </a>
             </div>
           )}
@@ -223,7 +226,7 @@ export function BookingSuccess({
           <Link to="/">
             <Button variant="outline" size="lg" className="w-full">
               <Home className="w-5 h-5" />
-              Voltar para o início
+              {t.success_home_button}
             </Button>
           </Link>
         </div>

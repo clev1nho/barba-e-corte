@@ -1,5 +1,6 @@
 import { Star, Quote } from "lucide-react";
 import { Testimonial } from "@/hooks/useTestimonials";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface TestimonialsListProps {
   testimonials: Testimonial[];
@@ -22,12 +23,14 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export function TestimonialsList({ testimonials, isLoading }: TestimonialsListProps) {
+  const { t } = useLanguage();
+
   if (isLoading) {
     return (
       <section className="section-premium bg-card/50">
         <div className="max-w-lg mx-auto">
           <div className="premium-divider" />
-          <h2 className="section-heading">O que nossos clientes dizem</h2>
+          <h2 className="section-heading">{t.testimonials_title}</h2>
           <div className="grid gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="glass-card rounded-2xl p-5 animate-pulse">
@@ -47,10 +50,8 @@ export function TestimonialsList({ testimonials, isLoading }: TestimonialsListPr
     <section className="section-premium bg-card/50">
       <div className="max-w-lg mx-auto">
         <div className="premium-divider" />
-        <h2 className="section-heading">O que nossos clientes dizem</h2>
-        <p className="section-subheading">
-          Avaliações reais de quem já passou por aqui
-        </p>
+        <h2 className="section-heading">{t.testimonials_title}</h2>
+        <p className="section-subheading">{t.testimonials_subtitle}</p>
 
         <div className="grid gap-4">
           {testimonials.map((testimonial, index) => (

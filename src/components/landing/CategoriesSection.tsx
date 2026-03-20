@@ -1,6 +1,7 @@
 import { useServiceCategories } from "@/hooks/useServiceCategories";
 import { useShopSettings } from "@/hooks/useShopSettings";
 import { Scissors } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ExtendedCategory {
   id: string;
@@ -13,6 +14,7 @@ interface ExtendedCategory {
 export function CategoriesSection() {
   const { data: categories, isLoading: loadingCategories } = useServiceCategories();
   const { data: settings, isLoading: loadingSettings } = useShopSettings();
+  const { t, translateShopField, translateCategory } = useLanguage();
 
   const isLoading = loadingCategories || loadingSettings;
 
@@ -21,7 +23,7 @@ export function CategoriesSection() {
       <section className="section-premium">
         <div className="max-w-lg mx-auto">
           <div className="premium-divider" />
-          <h2 className="section-heading">Nossos Serviços</h2>
+          <h2 className="section-heading">{t.services_default_title}</h2>
           <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="glass-card rounded-2xl p-6 animate-pulse">
@@ -41,8 +43,8 @@ export function CategoriesSection() {
 
   if (!enabledCategories.length) return null;
 
-  const sectionTitle = settings?.services_section_title || "Nossos Serviços";
-  const sectionSubtitle = settings?.services_section_subtitle || "Cuidados especializados para o homem moderno";
+  const sectionTitle = translateShopField("services_section_title", settings?.services_section_title) || t.services_default_title;
+  const sectionSubtitle = translateShopField("services_section_subtitle", settings?.services_section_subtitle) || t.services_default_subtitle;
 
   return (
     <section className="section-premium" id="servicos">
@@ -63,7 +65,7 @@ export function CategoriesSection() {
               {category.icon_image_url ? (
                 <img
                   src={category.icon_image_url}
-                  alt={category.name}
+                  alt={translateCategory(category.id, category.name)}
                   className="w-16 h-16 object-contain rounded-lg mb-3 mx-auto"
                 />
               ) : (
@@ -71,7 +73,7 @@ export function CategoriesSection() {
                   <Scissors className="w-7 h-7" />
                 </div>
               )}
-              <h3 className="font-semibold text-sm font-sans">{category.name}</h3>
+              <h3 className="font-semibold text-sm font-sans">{translateCategory(category.id, category.name)}</h3>
             </div>
           ))}
         </div>

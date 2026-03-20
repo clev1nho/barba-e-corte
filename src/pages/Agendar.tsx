@@ -14,6 +14,8 @@ import { useBarbers, Barber } from "@/hooks/useBarbers";
 import { useShopSettings } from "@/hooks/useShopSettings";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { LanguageSelector } from "@/i18n/LanguageSelector";
 
 export interface BookingData {
   services: ServiceWithCategory[];
@@ -47,8 +49,6 @@ const initialData: BookingData = {
   totalDeposit: 0,
 };
 
-const STEP_LABELS = ["Barbeiro", "Serviços", "Data", "Horário", "Dados", "Confirmar"];
-
 const Agendar = () => {
   const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState<BookingData>(initialData);
@@ -58,6 +58,7 @@ const Agendar = () => {
   const { data: barbers, isLoading: loadingBarbers } = useBarbers();
   const { data: settings } = useShopSettings();
   const createAppointment = useCreateAppointment();
+  const { t } = useLanguage();
 
   const totalSteps = 6;
 
@@ -135,6 +136,8 @@ const Agendar = () => {
     );
   }
 
+  const STEP_LABELS = t.booking_step_labels;
+
   return (
     <main className="min-h-screen bg-background">
       {/* Premium Header */}
@@ -152,11 +155,12 @@ const Agendar = () => {
             </Button>
           )}
           <div className="flex-1">
-            <h1 className="font-semibold font-display text-lg tracking-tight">Agendar horário</h1>
+            <h1 className="font-semibold font-display text-lg tracking-tight">{t.booking_title}</h1>
             <p className="text-xs text-muted-foreground">
-              Passo {step} de {totalSteps}
+              {t.booking_step_of.replace("{step}", String(step)).replace("{total}", String(totalSteps))}
             </p>
           </div>
+          <LanguageSelector />
         </div>
 
         {/* Premium step indicators */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGalleryImages } from "@/hooks/useGalleryImages";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const staticImages = [
   { id: "1", image_url: "/gallery/space-1.png", alt_text: "Sala de corte" },
@@ -12,6 +13,7 @@ const staticImages = [
 export function GallerySection() {
   const { data: dbImages } = useGalleryImages();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { t } = useLanguage();
 
   const images = dbImages && dbImages.length > 0 ? dbImages : staticImages;
 
@@ -34,10 +36,8 @@ export function GallerySection() {
     <section className="section-premium" id="espaco">
       <div className="max-w-4xl mx-auto">
         <div className="premium-divider" />
-        <h2 className="section-heading">Nosso Espaço</h2>
-        <p className="section-subheading">
-          Ambiente exclusivo e sofisticado para seu bem-estar
-        </p>
+        <h2 className="section-heading">{t.gallery_title}</h2>
+        <p className="section-subheading">{t.gallery_subtitle}</p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {images.map((image, index) => (
@@ -48,7 +48,7 @@ export function GallerySection() {
             >
               <img
                 src={image.image_url}
-                alt={image.alt_text || "Foto do espaço"}
+                alt={image.alt_text || t.gallery_title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -78,7 +78,7 @@ export function GallerySection() {
             
             <img
               src={images[selectedIndex].image_url}
-              alt={images[selectedIndex].alt_text || "Foto do espaço"}
+              alt={images[selectedIndex].alt_text || t.gallery_title}
               className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />

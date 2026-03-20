@@ -6,6 +6,7 @@ import { useShopSettings } from "@/hooks/useShopSettings";
 import { toast } from "@/hooks/use-toast";
 import { ServiceWithCategory } from "@/hooks/useServicesWithCategories";
 import { Barber } from "@/hooks/useBarbers";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface LegacyBookingData {
   service: ServiceWithCategory | null;
@@ -39,8 +40,8 @@ export function StepConfirm({
   const { data: settings } = useShopSettings();
   const [paidConfirmed, setPaidConfirmed] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { t, lang, translateService, translateShopField } = useLanguage();
 
-  // Use passed totals or compute from single service
   const services = allServices && allServices.length > 0 ? allServices : (bookingData.service ? [bookingData.service] : []);
   const displayPrice = propTotalPrice ?? services.reduce((sum, s) => sum + s.price, 0);
   const displayDuration = propTotalDuration ?? services.reduce((sum, s) => sum + s.duration_minutes, 0);
@@ -49,8 +50,10 @@ export function StepConfirm({
   const hasDeposit = depositAmount > 0;
   const pixConfigured = !!settings?.pix_key_or_link;
 
+  const dateLocale = lang === "en" ? "en-US" : lang === "es" ? "es-ES" : "pt-BR";
+
   const formattedDate = bookingData.date
-    ? new Date(bookingData.date + "T12:00:00").toLocaleDateString("pt-BR", {
+    ? new Date(bookingData.date + "T12:00:00").toLocaleDateString(dateLocale, {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -58,15 +61,17 @@ export function StepConfirm({
       })
     : "";
 
+  const pixMessage = translateShopField("pix_message", settings?.pix_message);
+
   const handleCopyPix = async () => {
     if (!settings?.pix_key_or_link) return;
     try {
       await navigator.clipboard.writeText(settings.pix_key_or_link);
       setCopied(true);
-      toast({ title: "Pix copiado!" });
+      toast({ title: t.step_confirm_pix_copied });
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      toast({ title: "Erro ao copiar", variant: "destructive" });
+      toast({ title: "Error", variant: "destructive" });
     }
   };
 
@@ -75,75 +80,68 @@ export function StepConfirm({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold">Confirme seu agendamento</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Revise os dados antes de confirmar
-        </p>
+        <h2 className="text-xl font-bold">{t.step_confirm_title}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{t.step_confirm_subtitle}</p>
       </div>
 
       <div className="glass-card rounded-2xl p-5 space-y-4">
-        {/* Services */}
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Scissors className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
             <p className="text-xs text-muted-foreground">
-              {services.length > 1 ? "Serviços" : "Serviço"}
+              {services.length > 1 ? t.step_confirm_services : t.step_confirm_service}
             </p>
             <div className="space-y-1">
               {services.map(s => (
-                <p key={s.id} className="font-semibold">{s.name}</p>
+                <p key={s.id} className="font-semibold">{translateService(s.id, s.name)}</p>
               ))}
             </div>
             {services.length > 1 && (
               <p className="text-xs text-muted-foreground mt-1">
-                Tempo total: {displayDuration} min
+                {t.step_confirm_total_time}: {displayDuration} {t.min_unit}
               </p>
             )}
           </div>
         </div>
 
-        {/* Barber */}
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <User className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Barbeiro</p>
+            <p className="text-xs text-muted-foreground">{t.step_confirm_barber}</p>
             <p className="font-semibold">{bookingData.barber?.name}</p>
           </div>
         </div>
 
-        {/* Date */}
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Calendar className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Data</p>
+            <p className="text-xs text-muted-foreground">{t.step_confirm_date}</p>
             <p className="font-semibold capitalize">{formattedDate}</p>
           </div>
         </div>
 
-        {/* Time */}
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Clock className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Horário</p>
+            <p className="text-xs text-muted-foreground">{t.step_confirm_time}</p>
             <p className="font-semibold">{bookingData.time}</p>
           </div>
         </div>
 
-        {/* Price */}
         <div className="flex items-center gap-4 pt-4 border-t border-border">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <DollarSign className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1">
-            <p className="text-xs text-muted-foreground">Valor total</p>
+            <p className="text-xs text-muted-foreground">{t.step_confirm_total}</p>
             <p className="text-xl font-bold text-primary">
               R$ {displayPrice.toFixed(2).replace(".", ",")}
             </p>
@@ -151,16 +149,14 @@ export function StepConfirm({
         </div>
       </div>
 
-      {/* Client info */}
       <div className="glass-card rounded-2xl p-5">
-        <p className="text-xs text-muted-foreground mb-2">Cliente</p>
+        <p className="text-xs text-muted-foreground mb-2">{t.step_confirm_client}</p>
         <p className="font-semibold">{bookingData.clientName}</p>
         <p className="text-sm text-muted-foreground">
           {bookingData.clientWhatsapp.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3")}
         </p>
       </div>
 
-      {/* PIX Deposit Section */}
       {hasDeposit && (
         <div className="glass-card rounded-2xl p-5 border-2 border-primary/50 space-y-4">
           <div className="flex items-center gap-3">
@@ -168,15 +164,13 @@ export function StepConfirm({
               <QrCode className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary">Sinal obrigatório via Pix</h3>
-              <p className="text-sm text-muted-foreground">
-                Para confirmar este agendamento, é necessário pagar o sinal antes.
-              </p>
+              <h3 className="font-semibold text-primary">{t.step_confirm_pix_title}</h3>
+              <p className="text-sm text-muted-foreground">{t.step_confirm_pix_desc}</p>
             </div>
           </div>
 
           <div className="bg-primary/10 rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">Valor do sinal:</p>
+            <p className="text-sm text-muted-foreground mb-1">{t.step_confirm_pix_deposit_label}</p>
             <p className="text-2xl font-bold text-primary">
               R$ {depositAmount.toFixed(2).replace(".", ",")}
             </p>
@@ -184,26 +178,19 @@ export function StepConfirm({
 
           {pixConfigured ? (
             <>
-              {settings?.pix_message && (
-                <p className="text-sm">{settings.pix_message}</p>
-              )}
+              {pixMessage && <p className="text-sm">{pixMessage}</p>}
 
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1 gap-2"
-                  onClick={handleCopyPix}
-                >
+                <Button type="button" variant="outline" className="flex-1 gap-2" onClick={handleCopyPix}>
                   {copied ? (
                     <>
                       <Check className="w-4 h-4" />
-                      Copiado!
+                      {t.step_confirm_pix_copied}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      Copiar Pix
+                      {t.step_confirm_pix_copy}
                     </>
                   )}
                 </Button>
@@ -221,7 +208,7 @@ export function StepConfirm({
                   className="mt-0.5"
                 />
                 <label htmlFor="paidConfirmed" className="text-sm cursor-pointer">
-                  Já paguei o sinal e quero confirmar meu agendamento
+                  {t.step_confirm_pix_checkbox}
                 </label>
               </div>
             </>
@@ -229,10 +216,8 @@ export function StepConfirm({
             <div className="flex items-start gap-3 bg-destructive/10 rounded-xl p-4">
               <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-destructive">Pix ainda não configurado</p>
-                <p className="text-xs text-muted-foreground">
-                  Fale com a barbearia no WhatsApp para combinar o pagamento do sinal.
-                </p>
+                <p className="text-sm font-medium text-destructive">{t.step_confirm_pix_not_configured_title}</p>
+                <p className="text-xs text-muted-foreground">{t.step_confirm_pix_not_configured_desc}</p>
               </div>
             </div>
           )}
@@ -248,10 +233,10 @@ export function StepConfirm({
         {isLoading ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Confirmando...
+            {t.step_confirm_loading}
           </>
         ) : (
-          "Confirmar agendamento"
+          t.step_confirm_button
         )}
       </Button>
     </div>

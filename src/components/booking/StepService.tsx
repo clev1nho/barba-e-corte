@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useServicesWithCategories, ServiceWithCategory, groupServicesByCategory } from "@/hooks/useServicesWithCategories";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface StepServiceProps {
-  services?: any[]; // Legacy prop, ignored
+  services?: any[];
   isLoading?: boolean;
   selected: ServiceWithCategory | null;
   onSelect: (service: ServiceWithCategory) => void;
@@ -12,6 +13,7 @@ interface StepServiceProps {
 export function StepService({ selected, onSelect }: StepServiceProps) {
   const { data: services, isLoading } = useServicesWithCategories();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const { t, translateCategory, translateService } = useLanguage();
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }));
@@ -20,7 +22,7 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold mb-6">Escolha o serviço</h2>
+        <h2 className="text-xl font-bold mb-6">{t.step_service_title}</h2>
         {[1, 2, 3].map((i) => (
           <div key={i} className="glass-card rounded-xl p-4 animate-pulse">
             <div className="h-5 bg-muted rounded w-1/3 mb-2" />
@@ -36,7 +38,7 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold mb-6">Escolha o serviço</h2>
+      <h2 className="text-xl font-bold mb-6">{t.step_service_title}</h2>
 
       {grouped.map((group) => {
         const isExpanded = expandedCategories[group.categoryName] ?? false;
@@ -54,17 +56,16 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
 
             {isExpanded && (
               <div className="border-t border-border">
-                {/* Regular services */}
                 {group.services.map((service) => (
                   <ServiceItem
                     key={service.id}
                     service={service}
                     isSelected={selected?.id === service.id}
                     onSelect={onSelect}
+                    translateService={translateService}
                   />
                 ))}
 
-                {/* Subcategories */}
                 {hasSubcategories && Object.entries(group.subcategories).map(([subcat, services]) => (
                   <div key={subcat}>
                     <div className="px-4 py-2 bg-muted/30 text-sm font-medium text-muted-foreground">
@@ -76,6 +77,7 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
                         service={service}
                         isSelected={selected?.id === service.id}
                         onSelect={onSelect}
+                        translateService={translateService}
                       />
                     ))}
                   </div>
@@ -92,12 +94,15 @@ export function StepService({ selected, onSelect }: StepServiceProps) {
 function ServiceItem({ 
   service, 
   isSelected, 
-  onSelect 
+  onSelect,
+  translateService,
 }: { 
   service: ServiceWithCategory; 
   isSelected: boolean; 
   onSelect: (s: ServiceWithCategory) => void;
+  translateService: (id: string, ptName: string) => string;
 }) {
+  const { t } = useLanguage();
   return (
     <button
       onClick={() => onSelect(service)}
@@ -107,9 +112,9 @@ function ServiceItem({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1">
-          <h3 className="font-medium">{service.name}</h3>
+          <h3 className="font-medium">{translateService(service.id, service.name)}</h3>
           <div className="flex items-center gap-4 mt-1 text-sm">
-            <span className="text-muted-foreground">{service.duration_minutes} min</span>
+            <span className="text-muted-foreground">{service.duration_minutes} {t.min_unit}</span>
             <span className="text-primary font-semibold">
               R$ {service.price.toFixed(2).replace(".", ",")}
             </span>

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShopSettings } from "@/hooks/useShopSettings";
 import { Barber } from "@/hooks/useBarbers";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface StepDateProps {
   settings: ShopSettings | null;
@@ -12,12 +13,6 @@ interface StepDateProps {
   selected: string;
   onSelect: (date: string) => void;
 }
-
-const DAYS_PT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const MONTHS_PT = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
 
 const DAY_MAP: Record<string, number> = {
   domingo: 0, segunda: 1, terça: 2, quarta: 3, quinta: 4, sexta: 5, sábado: 6
@@ -32,13 +27,13 @@ function formatDate(date: Date): string {
 
 export function StepDate({ settings, barbers, selectedBarber, anyBarber, selected, onSelect }: StepDateProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const { t } = useLanguage();
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const allowSameDay = settings?.allow_same_day ?? true;
 
-  // Get available days of week from barbers
   const getAvailableDaysOfWeek = (): Set<number> => {
     const days = new Set<number>();
     const barbersToCheck = anyBarber ? barbers : selectedBarber ? [selectedBarber] : [];
@@ -59,13 +54,8 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
     const dateOnly = new Date(date);
     dateOnly.setHours(0, 0, 0, 0);
 
-    // Past dates
     if (dateOnly < today) return false;
-
-    // Same day check
     if (dateOnly.getTime() === today.getTime() && !allowSameDay) return false;
-
-    // Check day of week
     return availableDays.has(dateOnly.getDay());
   };
 
@@ -79,12 +69,10 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
 
     const days: (Date | null)[] = [];
 
-    // Empty slots before first day
     for (let i = 0; i < startingDay; i++) {
       days.push(null);
     }
 
-    // Days of month
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(year, month, i));
     }
@@ -110,31 +98,28 @@ export function StepDate({ settings, barbers, selectedBarber, anyBarber, selecte
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">Escolha a data</h2>
+      <h2 className="text-xl font-bold">{t.step_date_title}</h2>
 
-      {/* Month navigation */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="icon" onClick={prevMonth}>
           <ChevronLeft className="w-5 h-5" />
         </Button>
         <span className="font-semibold">
-          {MONTHS_PT[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+          {t.step_date_months[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </span>
         <Button variant="ghost" size="icon" onClick={nextMonth}>
           <ChevronRight className="w-5 h-5" />
         </Button>
       </div>
 
-      {/* Days header */}
       <div className="grid grid-cols-7 gap-1">
-        {DAYS_PT.map((day) => (
+        {t.step_date_days.map((day) => (
           <div key={day} className="text-center text-xs text-muted-foreground py-2">
             {day}
           </div>
         ))}
       </div>
 
-      {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-1">
         {days.map((date, index) => {
           if (!date) {

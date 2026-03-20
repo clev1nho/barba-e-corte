@@ -1,4 +1,5 @@
 import { Barber } from "@/hooks/useBarbers";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface BarbersListProps {
   barbers: Barber[];
@@ -15,12 +16,14 @@ function getInitials(name: string): string {
 }
 
 export function BarbersList({ barbers, isLoading }: BarbersListProps) {
+  const { t } = useLanguage();
+
   if (isLoading) {
     return (
       <section className="section-premium">
         <div className="max-w-4xl mx-auto">
           <div className="premium-divider" />
-          <h2 className="section-heading">Nossos Barbeiros</h2>
+          <h2 className="section-heading">{t.barbers_title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="glass-card rounded-2xl overflow-hidden animate-pulse">
@@ -42,10 +45,8 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
     <section className="section-premium">
       <div className="max-w-5xl mx-auto">
         <div className="premium-divider" />
-        <h2 className="section-heading">Nossos Barbeiros</h2>
-        <p className="section-subheading">
-          Profissionais experientes e dedicados
-        </p>
+        <h2 className="section-heading">{t.barbers_title}</h2>
+        <p className="section-subheading">{t.barbers_subtitle}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {barbers.map((barber, index) => (
@@ -54,7 +55,6 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
               className="glass-card-hover rounded-2xl overflow-hidden animate-fade-in flex flex-col border-primary/15"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Image area */}
               <div className="w-full aspect-[3/4] bg-card flex items-center justify-center p-4">
                 {barber.photo_url ? (
                   <img
@@ -70,7 +70,6 @@ export function BarbersList({ barbers, isLoading }: BarbersListProps) {
                   </div>
                 )}
               </div>
-              {/* Name bar */}
               <div className="h-16 flex items-center justify-center px-4 shrink-0 bg-card border-t border-primary/10">
                 <h3 className="font-semibold text-lg text-center text-foreground font-sans">{barber.name}</h3>
               </div>
